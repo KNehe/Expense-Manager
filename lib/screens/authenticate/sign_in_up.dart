@@ -1,6 +1,6 @@
+import 'package:expensetracker/Components/customClipPath.dart';
 import 'package:expensetracker/Components/customProgressDialog.dart';
 import 'package:expensetracker/Services/authService.dart';
-import 'package:expensetracker/Utilities/clipperClass.dart';
 import 'package:expensetracker/screens/authenticate/forgotPassword.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +10,7 @@ import 'package:expensetracker/Utilities/validations.dart';
 
 
 class SignIn extends StatefulWidget {
+  static String id = 'auth';
   @override
   _SignInState createState() => _SignInState();
 }
@@ -43,7 +44,7 @@ class _SignInState extends State<SignIn> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.green[100],
+      backgroundColor: scaffoldBackgroundColor,
      body: SafeArea(
 
         child: Container(
@@ -52,15 +53,7 @@ class _SignInState extends State<SignIn> {
 
             children: <Widget>[
 
-              ClipPath(
-                clipper: ClippingClass(),
-                child: Container(
-                  height: MediaQuery.of(context).size.height/2.4,
-                  decoration: BoxDecoration(
-                    color: clipColor
-                  ),
-                ),
-              ),
+              CustomClipPath(),
 
               SizedBox(height: 50),
 

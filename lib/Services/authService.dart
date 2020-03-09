@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 class AuthService{
 
   final FirebaseAuth _auth =  FirebaseAuth.instance;
+  
 
   //creating a custom user object from a FirebaseUser
   User _userFromFireBaseUser(FirebaseUser user){
@@ -17,7 +18,7 @@ class AuthService{
   }
 
   //auth changes using stream
-  Stream<User> get user {
+  Stream<User> get getUser {
     return  _auth.onAuthStateChanged
         .map(_userFromFireBaseUser);
   }
@@ -57,6 +58,15 @@ class AuthService{
     }catch(e){
       print("Sign Out Error: " + e.toString());
       return null;
+    }
+  }
+
+  Future sendResetPasswordLink(String email, GlobalKey<ScaffoldState> scaffoldKey) async{
+    try{
+       return _auth.sendPasswordResetEmail(email: email) ;
+
+    }catch(e){
+      AuthErrorHandler.determineAuthError(e, scaffoldKey);
     }
   }
 

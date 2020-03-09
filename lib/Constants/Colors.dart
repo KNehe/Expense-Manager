@@ -7,3 +7,5 @@ const appBarColor = Color.fromRGBO(92, 119, 11, 0.7);
 const buttonColor = Color.fromRGBO(190, 130, 0, 1);
 const buttonTextColor = Colors.white;
 const snackBarColor = Color.fromRGBO(0, 71, 0, 1);
+
+Color scaffoldBackgroundColor = Colors.green[100];

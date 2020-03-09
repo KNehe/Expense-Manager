@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 class Home extends StatelessWidget {
 
+  static String id = 'home';
+
   final AuthService _authService = AuthService();
   @override
   Widget build(BuildContext context) {
