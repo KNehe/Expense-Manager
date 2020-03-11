@@ -1,31 +1,56 @@
-import 'package:expensetracker/Services/authService.dart';
+import 'package:expensetracker/Constants/Colors.dart';
+import 'package:expensetracker/screens/addExpense/addExpense.dart';
 import 'package:flutter/material.dart';
 
-class Home extends StatelessWidget {
 
-  static String id = 'home';
+class Home extends StatefulWidget {
 
-  final AuthService _authService = AuthService();
+  static String id = 'Home';
+
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+
+  int _currentIndex = 0;
+
+  final tabs = [
+    AddExpense(),
+    Center( child: Text('Statistics'),),
+    Center( child: Text('Account'),)
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: <Widget>[
-          Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: GestureDetector(
-                onTap: () { _authService.signOutUser();},
-                child: Icon(
-                  Icons.close,
-                  size: 26.0,
-                ),
-              )
+      backgroundColor: scaffoldBackgroundColor,
+      body: SafeArea(
+          child: tabs[_currentIndex],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        items: [
+           BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            title: Text('Home')
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            title: Text('Statistics')
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            title: Text('Account')
           )
         ],
+        onTap: (index) => setState( ()=> _currentIndex = index ),
+        backgroundColor: clipColor,
+        selectedItemColor: scaffoldBackgroundColor,
+        unselectedFontSize: 14.0,
+        selectedFontSize: 15.0,
       ),
-      body: Container(
-        child: Text('home'),
-    ),
     );
   }
 }
+

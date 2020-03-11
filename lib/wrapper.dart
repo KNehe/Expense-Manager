@@ -1,10 +1,7 @@
 import 'package:expensetracker/Services/authService.dart';
-import 'package:expensetracker/models/user.dart';
 import 'package:expensetracker/screens/authenticate/authenticate.dart';
 import 'package:expensetracker/screens/home/home.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 
 class Wrapper extends StatefulWidget {
 
@@ -16,33 +13,35 @@ class Wrapper extends StatefulWidget {
 
 class _WrapperState extends State<Wrapper> {
 
-//   AuthService authService = AuthService();
-//   var user;
-
-bool isLoggedIn;
-
-  @override
-  void initState() {
-//    user = authService.getUser;
-    FirebaseAuth.instance.currentUser().then( (user) => user != null?
-     setState((){
-       isLoggedIn = true;
-     }):
-    setState((){
-      isLoggedIn = false;
-    }));
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
-   return isLoggedIn ? Home() : Authenticate();
+
+    return FutureBuilder<bool>(
+      future: AuthService.getLoginState(),
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot){
+        switch(snapshot.connectionState){
+          case ConnectionState.active:
+          case ConnectionState.waiting:
+            return Scaffold( body: Center( child: Text('Loading ...'),),);
+          case ConnectionState.none:
+          case ConnectionState.done:
+            if(snapshot.hasData){
+              bool loginState = snapshot.data;
+              if(loginState){
+                return Home();
+              }else{
+                return Authenticate();
+              }
+            }else{
+              return Authenticate();
+            }
+        }
+          return Authenticate();
+      },
+
+    );
+
   }
 
-
 }
-
-
-
-
-

@@ -6,7 +6,6 @@ import 'package:expensetracker/screens/home/home.dart';
 import 'package:expensetracker/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'Constants/Colors.dart';
 
 void main() => runApp(MyApp());
@@ -28,18 +27,19 @@ class MyApp extends StatelessWidget {
       //TODO splashscreen app logo
 
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: THEME_COLOR,
-        ),
-        home: Wrapper(),
-        routes: {
-          Wrapper.id: (context)=> Wrapper(),
-          ForgotPassword.id : (context) => ForgotPassword(),
-          SignIn.id : (context) => SignIn(),
-          Home.id: (context) => Home()
-        },
-      );
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            primarySwatch: THEME_COLOR,
+          ),
+          home: Wrapper(),
+          routes: {
+            Wrapper.id: (context)=> Wrapper(),
+            ForgotPassword.id : (context) => ForgotPassword(),
+            SignIn.id : (context) => SignIn(),
+            Home.id: (context) => Home()
+          },
+        );
+
 
   }
 }

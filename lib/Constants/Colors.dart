@@ -9,3 +9,4 @@ const buttonTextColor = Colors.white;
 const snackBarColor = Color.fromRGBO(0, 71, 0, 1);
 
 Color scaffoldBackgroundColor = Colors.green[100];
+Color cardColor = Colors.green[300];

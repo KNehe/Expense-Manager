@@ -130,7 +130,7 @@ class _SignInState extends State<SignIn> {
 
                 if (saveAndValidate()) {
                    progressDialog.showDialog('Signing you in ...');
-                   await _authService.signInUser(_email, _password, _scaffoldKey);
+                   await _authService.signInUser(_email, _password, _scaffoldKey,context);
                    progressDialog.hideDialog();
                 }
               },
@@ -190,7 +190,7 @@ class _SignInState extends State<SignIn> {
                 if (saveAndValidate()) {
 
                   progressDialog.showDialog('Signing you up ...');
-                  await _authService.signUpUser(_email, _password,_scaffoldKey);
+                  await _authService.signUpUser(_email, _password,_scaffoldKey,context);
                   progressDialog.hideDialog();
 
                 }
