@@ -1,4 +1,3 @@
-import 'package:expensetracker/Components/customProgressDialog.dart';
 import 'package:expensetracker/Utilities/authErrorHandler.dart';
 import 'package:expensetracker/models/user.dart';
 import 'package:expensetracker/screens/authenticate/sign_in_up.dart';
@@ -19,10 +18,10 @@ class AuthService{
     return user != null ? User(uid: user.uid) : null;
   }
 
-//  Stream<User> get getUser {
-//    return  _auth.onAuthStateChanged
-//        .map(_userFromFireBaseUser);
-//  }
+   Stream<User> get getUser {
+    return  _auth.onAuthStateChanged
+        .map(_userFromFireBaseUser);
+  }
 
   Future signInUser(String email, String password, GlobalKey<ScaffoldState> scaffoldKey,BuildContext context) async {
 

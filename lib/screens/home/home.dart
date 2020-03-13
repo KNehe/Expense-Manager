@@ -1,5 +1,6 @@
 import 'package:expensetracker/Constants/Colors.dart';
 import 'package:expensetracker/screens/addExpense/addExpense.dart';
+import 'package:expensetracker/screens/statistics/statistics.dart';
 import 'package:flutter/material.dart';
 
 
@@ -15,15 +16,20 @@ class _HomeState extends State<Home> {
 
   int _currentIndex = 0;
 
-  final tabs = [
-    AddExpense(),
-    Center( child: Text('Statistics'),),
-    Center( child: Text('Account'),)
-  ];
+  static final _scaffoldKey = GlobalKey<ScaffoldState>();
+
 
   @override
   Widget build(BuildContext context) {
+
+    final tabs = [
+      AddExpense(scaffoldKey: _scaffoldKey,),
+      Statistics(scaffoldKey: _scaffoldKey,),
+      Center( child: Text('Account'),)
+    ];
+
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: scaffoldBackgroundColor,
       body: SafeArea(
           child: tabs[_currentIndex],
