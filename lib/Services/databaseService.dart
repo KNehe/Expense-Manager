@@ -87,4 +87,11 @@ class DatabaseService {
         .snapshots();
   }
 
+
+  Stream<QuerySnapshot> get getTodayStats {
+    return reference.document(userId).collection(todayDate).document('Expenses')
+        .collection('Expenses').orderBy('TimeRecorded')
+        .snapshots();
+  }
+
 }
