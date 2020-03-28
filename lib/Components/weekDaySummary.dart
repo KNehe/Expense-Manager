@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date_format/date_format.dart';
 import 'package:expensetracker/Components/customText.dart';
 import 'package:expensetracker/Services/databaseService.dart';
+import 'package:expensetracker/models/income.dart';
 import 'package:expensetracker/models/user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -44,21 +46,24 @@ class  WeekDaySummary{
                   textColor: Colors.black54,
                   fontFamily: 'open sans',
                   fontWeight: FontWeight.w500,
-                  fontSize: 10.0,
+                  fontSize: 13.0,
                 )
             );
             listTiles.add(listTile);
           }
 
-        }else{
+        }
+        else{
           listTiles.add(ListTile(title: Text('No Records'),));
         }
-
 
         return  SingleChildScrollView(
             child: Container(
               margin: EdgeInsets.all(10.0),
-              child: Column(children: <Widget>[
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
                 Row( children: <Widget>[
 
                   CustomText(
@@ -69,7 +74,7 @@ class  WeekDaySummary{
                     fontSize: 15.0,
                   ),
 
-                  SizedBox(width: 10.0,),
+                  SizedBox(width: 15.0,),
 
                   CustomText(
                     text: 'Expenditure : $expenditure',
@@ -81,7 +86,31 @@ class  WeekDaySummary{
 
 
                 ],),
-                Column(children: listTiles,)
+                SizedBox(height: 5.0,),
+                Row(
+                  children: <Widget>[
+                    StreamBuilder<Income>(
+                      stream: DatabaseService(userId: user.uid).getIncomeByDate(weekDayDate) ,
+                      builder: (context,snapshot){
+                        var income = 0;
+                        if(snapshot.hasData){
+                          income = snapshot.data.income;
+                        }
+                        return CustomText(
+                          text: 'Income : $income',
+                          textColor: Colors.black,
+                          fontFamily: 'open sans',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15.0,
+                        ) ;
+                      },
+                    )
+                  ],
+                ),
+                Column(
+                  children: listTiles,
+                ),
+                  IconButton( icon:  Icon(Icons.close,size: 25.0,color: Colors.red),onPressed: (){Navigator.pop(context);},)
               ],),
             ));
 

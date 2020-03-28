@@ -27,6 +27,7 @@ class Statistics extends StatefulWidget {
 
 class _StatisticsState extends State<Statistics> {
 
+  Future _getThisWeekExpenditure;
   var _itemPrice;
   var _item;
 
@@ -65,17 +66,13 @@ class _StatisticsState extends State<Statistics> {
 
     final user = Provider.of<User>(context,listen: false);
 
-    if(expenditure != 0){
+    if(expenditure != 0 && expenditure != null){
      WeekDaySummary(user: user,scaffoldKey: widget.scaffoldKey,
                     weekDay:  weekDay, expenditure: expenditure,
                     weekDayDate: weekDayDate).showWeekDaySummary();
     }
 
   }
-
-
-
-  Future _getThisWeekExpenditure;
 
 
   @override
@@ -254,7 +251,7 @@ class _StatisticsState extends State<Statistics> {
                 return Container(
                     margin: EdgeInsets.only(left: 5.0,right: 5.0),
                     child: CustomCard(
-                        cardHeight: 100.0,
+                        cardHeight: 300.0,
                         cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
                         cardColor: cardColor,
                         gradientColor1: clipColor,
@@ -270,7 +267,7 @@ class _StatisticsState extends State<Statistics> {
                             ),
                             SizedBox(height: 5.0,),
                             Center(
-                              child:  Text('Loading ...'),
+                              child:  CircularProgressIndicator(backgroundColor: scaffoldBackgroundColor,)
                             ),
                           ],
                         )
@@ -318,7 +315,7 @@ class _StatisticsState extends State<Statistics> {
                   return Container(
                     margin: EdgeInsets.only(left: 5.0, right: 5.0),
                     child: CustomCard(
-                        cardHeight: 500.0,
+                        cardHeight: 300.0,
                         cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
                         cardColor: cardColor,
                         gradientColor1: clipColor,
@@ -343,6 +340,10 @@ class _StatisticsState extends State<Statistics> {
             return  Center( child: Text('No Content'),);
           },
         ),
+
+        SizedBox(height:10.0 ,),
+
+
 
 
 

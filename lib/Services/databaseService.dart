@@ -166,16 +166,13 @@ class DatabaseService {
 
   }
 
-
-  searchByDateTime(DateTime dateTime){
-
-    var dateSearch = dateTime.day.toString() + "-" + dateTime.month.toString() + "-"+ dateTime.year.toString();
-
-    return reference.document(userId).collection(dateSearch).document('Expenses')
-        .collection('Expenses').orderBy('TimeRecorded')
-        .snapshots();
-
+  Stream<Income> getIncomeByDate(String date) {
+    return reference.document(userId).collection(date)
+        .document('Income')
+        .snapshots()
+        .map(mapSnapshotToIncome);
   }
+
 
 
 
