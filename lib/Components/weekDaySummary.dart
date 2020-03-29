@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
 import 'package:expensetracker/Components/customText.dart';
+import 'package:expensetracker/Constants/Colors.dart';
 import 'package:expensetracker/Services/databaseService.dart';
 import 'package:expensetracker/models/income.dart';
 import 'package:expensetracker/models/user.dart';
@@ -59,10 +60,10 @@ class  WeekDaySummary{
 
         return  SingleChildScrollView(
             child: Container(
-              margin: EdgeInsets.all(10.0),
+              color: scaffoldBackgroundColor,
+              padding: EdgeInsets.only(left: 10.0,top: 20.0,bottom: 20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                 Row( children: <Widget>[
 

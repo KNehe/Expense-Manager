@@ -1,7 +1,7 @@
 import 'package:expensetracker/Components/customProgressDialog.dart';
 import 'package:expensetracker/Components/customSnackbar.dart';
 import 'package:expensetracker/Services/authService.dart';
-import 'package:expensetracker/Utilities/authErrorHandler.dart';
+import 'package:expensetracker/Utilities/errorHandler.dart';
 import 'package:expensetracker/Utilities/validations.dart';
 import 'package:expensetracker/screens/authenticate/sign_in_up.dart';
 import 'package:flutter/cupertino.dart';
@@ -117,7 +117,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
     }catch(error){
       progressDialog.hideDialog();
-      AuthErrorHandler.determineResetError(error, _scaffoldKey);
+      ErrorHandler.determineResetError(error, _scaffoldKey);
     }
   }
 }

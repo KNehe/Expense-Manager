@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
 import 'package:expensetracker/Components/customSnackbar.dart';
+import 'package:expensetracker/Utilities/errorHandler.dart';
 import 'package:expensetracker/Utilities/dateUtils.dart';
+import 'package:expensetracker/models/expense.dart';
 import 'package:expensetracker/models/income.dart';
 import 'package:expensetracker/models/weekExpense.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +41,9 @@ class DatabaseService {
 
   //add income to db
   Future addIncome(int income, GlobalKey<ScaffoldState> scaffoldKey) async {
-    int oldIncome;
+
+    int oldIncome = 0;
+
     try {
       await reference.document(userId).collection(todayDate).document('Income')
           .get().then((value) {
@@ -49,8 +53,9 @@ class DatabaseService {
           oldIncome = value.data['Income'];
         }
       })
-          .catchError((e) {
-        CustomSnackBar.showSnackBar(scaffoldKey, e.toString());
+          .catchError((error) {
+            print('addIcome1 $error');
+         ErrorHandler.determineError(error, scaffoldKey);
       });
 
       int newIncome = oldIncome + income;
@@ -60,10 +65,11 @@ class DatabaseService {
         'Income': newIncome
       });
 
-
       CustomSnackBar.showSnackBar(scaffoldKey, 'Income added');
-    } catch (e) {
-      CustomSnackBar.showSnackBar(scaffoldKey, e.toString());
+
+    } catch (error) {
+      print('addIcome2 $error');
+      ErrorHandler.determineError(error, scaffoldKey);
     }
   }
 
@@ -80,8 +86,8 @@ class DatabaseService {
       });
 
       CustomSnackBar.showSnackBar(scaffoldKey, 'Expense saved ');
-    } catch (e) {
-      CustomSnackBar.showSnackBar(scaffoldKey, e.toString());
+    } catch (error) {
+      CustomSnackBar.showSnackBar(scaffoldKey, 'An eror occured! Try again');
     }
   }
 
@@ -100,7 +106,7 @@ class DatabaseService {
   }
 
 
-  getThisWeekExpenditure()  async{
+  getThisWeekExpenditure(GlobalKey<ScaffoldState> scaffoldKey)  async{
 
     List<WeekExpense> weekExpenses =  new List<WeekExpense>();
 
@@ -112,7 +118,13 @@ class DatabaseService {
 
       weekDay = DateTime.now().weekday;
       day = (DateTime.now().day - i ).toString();
-      weekDayDate =  day + "-0" + DateTime.now().month.toString() + "-"  + DateTime.now().year.toString();
+
+      if(DateTime.now().month.toString().length == 1){
+        weekDayDate =  day + "-0" + DateTime.now().month.toString() + "-"  + DateTime.now().year.toString();
+      }else{
+        weekDayDate =  day + "-" + DateTime.now().month.toString() + "-"  + DateTime.now().year.toString();
+      }
+
 
       int totalExpenditure = 0;
 
@@ -147,7 +159,7 @@ class DatabaseService {
 
 
        }).catchError((error){
-         print('WeekExpenditure $error');
+         ErrorHandler.determineError(error, scaffoldKey);
        });
 
 
@@ -158,7 +170,7 @@ class DatabaseService {
 
 
   Stream<QuerySnapshot> searchByWeekDayDate(String weekDayDate){
-    print('Weekdaydate : $weekDayDate');
+
     return reference.document(userId).collection(weekDayDate).document('Expenses')
         .collection('Expenses').orderBy('TimeRecorded')
         .snapshots();
@@ -168,6 +180,35 @@ class DatabaseService {
 
   Stream<Income> getIncomeByDate(String date) {
     return reference.document(userId).collection(date)
+        .document('Income')
+        .snapshots()
+        .map(mapSnapshotToIncome);
+  }
+
+  Stream<QuerySnapshot> searchExpenseByDateTime({@required GlobalKey<ScaffoldState> scaffoldKey, @required dynamic dateTime}) {
+
+    var searchValue;
+
+    if(dateTime.month.toString().length == 1){
+      searchValue = dateTime.day.toString() + '-0' + dateTime.month.toString()  + '-' + dateTime.year.toString();
+    }else{
+      searchValue = dateTime.day.toString() + '-' + dateTime.month.toString()  + '-' + dateTime.year.toString();
+    }
+
+    return reference.document(userId).collection(searchValue).document('Expenses')
+        .collection('Expenses').snapshots();
+  }
+
+  Stream<Income> searchIncomeByDate(dynamic dateTime) {
+
+    var searchValue;
+
+    if(dateTime.month.toString().length == 1){
+      searchValue = dateTime.day.toString() + '-0' + dateTime.month.toString()  + '-' + dateTime.year.toString();
+    }else{
+      searchValue = dateTime.day.toString() + '-' + dateTime.month.toString()  + '-' + dateTime.year.toString();
+    }
+    return reference.document(userId).collection(searchValue)
         .document('Income')
         .snapshots()
         .map(mapSnapshotToIncome);

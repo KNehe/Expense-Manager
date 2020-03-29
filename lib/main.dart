@@ -24,7 +24,10 @@ class MyApp extends StatelessWidget {
       ]);
       
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor:  clipColor
+        statusBarColor:  statusBarColor,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: bottomNavigationBackgroundColor,
+        systemNavigationBarIconBrightness: Brightness.light,
       ));
       //TODO splashscreen app logo
 

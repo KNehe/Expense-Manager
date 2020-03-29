@@ -1,4 +1,4 @@
-import 'package:expensetracker/Utilities/authErrorHandler.dart';
+import 'package:expensetracker/Utilities/errorHandler.dart';
 import 'package:expensetracker/models/user.dart';
 import 'package:expensetracker/screens/authenticate/sign_in_up.dart';
 import 'package:expensetracker/screens/home/home.dart';
@@ -36,7 +36,7 @@ class AuthService{
       return _userFromFireBaseUser(firebaseUser);
 
     } catch (signUpError) {
-      AuthErrorHandler.determineAuthError(signUpError, scaffoldKey);
+      ErrorHandler.determineAuthError(signUpError, scaffoldKey);
     }
 
   }
@@ -55,7 +55,7 @@ class AuthService{
       return _userFromFireBaseUser(firebaseUser);
 
     }catch(signUpError){
-      AuthErrorHandler.determineAuthError(signUpError, scaffoldKey);
+      ErrorHandler.determineAuthError(signUpError, scaffoldKey);
     }
   }
 
@@ -69,7 +69,7 @@ class AuthService{
        return Navigator.pushReplacementNamed(context, SignIn.id);
 
     }catch(signOutError){
-      return  AuthErrorHandler.determineAuthError(signOutError, scaffoldKey);
+      return  ErrorHandler.determineAuthError(signOutError, scaffoldKey);
     }
   }
 
@@ -78,7 +78,7 @@ class AuthService{
        return _auth.sendPasswordResetEmail(email: email) ;
 
     }catch(e){
-      AuthErrorHandler.determineAuthError(e, scaffoldKey);
+      ErrorHandler.determineAuthError(e, scaffoldKey);
     }
   }
 

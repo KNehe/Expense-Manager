@@ -133,8 +133,11 @@ class _AddExpenseState extends State<AddExpense> {
                                   onPressed: () async{
                                     if(_formIncome.currentState.validate()){
                                       _formIncome.currentState.save();
+
                                       progressDialog.showDialog('Adding Income');
+
                                       await  DatabaseService(userId: user.uid).addIncome(_income,widget.scaffoldKey);
+
                                       progressDialog.hideDialog();
                                       _formIncome.currentState.reset();
                                     }

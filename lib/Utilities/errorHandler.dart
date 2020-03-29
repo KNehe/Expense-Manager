@@ -1,7 +1,7 @@
 import 'package:expensetracker/Components/customSnackbar.dart';
 import 'package:flutter/material.dart';
 
-class AuthErrorHandler{
+class ErrorHandler{
 
   static  determineAuthError(dynamic signUpError, GlobalKey<ScaffoldState> scaffoldKey){
 
@@ -31,6 +31,19 @@ class AuthErrorHandler{
     switch(error.code){
       case 'ERROR_USER_NOT_FOUND':  CustomSnackBar.showSnackBar(scaffoldKey, 'Email not registered !');
       break;
+      case 'ERROR_NETWORK_REQUEST_FAILED': CustomSnackBar.showSnackBar(scaffoldKey, 'A network error has occured');
+      break;
+      default : CustomSnackBar.showSnackBar(scaffoldKey, 'An error occurred try again!! ');
+
+    }
+
+  }
+
+
+
+  static  determineError(dynamic error, GlobalKey<ScaffoldState> scaffoldKey){
+
+    switch(error.code){
       case 'ERROR_NETWORK_REQUEST_FAILED': CustomSnackBar.showSnackBar(scaffoldKey, 'A network error has occured');
       break;
       default : CustomSnackBar.showSnackBar(scaffoldKey, 'An error occurred try again!! ');

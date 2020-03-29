@@ -51,8 +51,9 @@ class _HomeState extends State<Home> {
           )
         ],
         onTap: (index) => setState( ()=> _currentIndex = index ),
-        backgroundColor: clipColor,
-        selectedItemColor: scaffoldBackgroundColor,
+        backgroundColor: bottomNavigationBackgroundColor,
+        selectedItemColor: buttonColor,
+        unselectedItemColor: clipColor,
         unselectedFontSize: 14.0,
         selectedFontSize: 15.0,
       ),

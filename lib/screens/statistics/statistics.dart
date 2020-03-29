@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expensetracker/Components/customCard.dart';
 import 'package:expensetracker/Components/customText.dart';
+import 'package:expensetracker/Components/datePicker.dart';
 import 'package:expensetracker/Components/todayGraph.dart';
 import 'package:expensetracker/Components/weekDaySummary.dart';
 import 'package:expensetracker/Components/weekGraph.dart';
@@ -28,8 +29,14 @@ class Statistics extends StatefulWidget {
 class _StatisticsState extends State<Statistics> {
 
   Future _getThisWeekExpenditure;
+
   var _itemPrice;
   var _item;
+
+  var _selectedDate;
+
+  var _itemPrice2;
+  var _item2;
 
 
   _onTodayGraphSelected(charts.SelectionModel model){
@@ -74,6 +81,24 @@ class _StatisticsState extends State<Statistics> {
 
   }
 
+  _onResultGraphSelected(charts.SelectionModel model){
+
+    final selectedDatum = model.selectedDatum;
+
+    var itemPrice;
+    var item;
+
+    if (selectedDatum.isNotEmpty) {
+      itemPrice = selectedDatum.first.datum.price;
+      item = selectedDatum.first.datum.item;
+    }
+
+    setState(() {
+      _itemPrice2 = itemPrice;
+      _item2 = item;
+    });
+  }
+
 
   @override
   void initState() {
@@ -81,8 +106,10 @@ class _StatisticsState extends State<Statistics> {
 
     final user = Provider.of<User>(context,listen: false);
 
-    _getThisWeekExpenditure = DatabaseService(userId:  user.uid).getThisWeekExpenditure();
+    _getThisWeekExpenditure = DatabaseService(userId:  user.uid).getThisWeekExpenditure(widget.scaffoldKey);
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -123,42 +150,46 @@ class _StatisticsState extends State<Statistics> {
                 }
 
                 if(!snapshot.hasData || snapshot.data.documents.isEmpty || snapshot.data.documents.length == 0){
-                  return Column(
-                    children: <Widget>[
+                  return Container(
+                    margin: EdgeInsets.only(left: 5.0,right: 5.0,top: 10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
 
-                      SizedBox(height: 10.0,),
+                        SizedBox(height: 10.0,),
 
-                      CustomCard(
-                      cardHeight: 280.0,
-                      cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-                      cardColor: cardColor,
-                      gradientColor1: clipColor,
-                      gradientColor2: cardColor,
-                      child: Column(
-                        children: <Widget>[
+                        CustomCard(
+                        cardHeight: 300.0,
+                        cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                        cardColor: cardColor,
+                        gradientColor1: clipColor,
+                        gradientColor2: cardColor,
+                        child: Column(
+                          children: <Widget>[
 
-                          CustomText(
-                            text: 'TODAY\'S STATISICS',
-                            textColor: Colors.white,
-                            fontFamily: 'open sans',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20.0,
-                          ),
+                            CustomText(
+                              text: 'TODAY\'S STATISICS',
+                              textColor: Colors.white,
+                              fontFamily: 'open sans',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20.0,
+                            ),
 
-                          SizedBox(height:15.0),
+                            SizedBox(height:15.0),
 
-                          CustomText(
-                            text: 'You haven\'t recorded any expenses today!',
-                            textColor: Colors.white,
-                            fontFamily: 'open sans',
-                            fontWeight: FontWeight.w400,
-                            fontSize: 15.0,
-                          ),
+                            CustomText(
+                              text: 'You haven\'t recorded any expenses today!',
+                              textColor: Colors.white,
+                              fontFamily: 'open sans',
+                              fontWeight: FontWeight.w400,
+                              fontSize: 15.0,
+                            ),
 
-                        ],
-                      )
-                  )
-                    ],
+                          ],
+                        )
+                    )
+                      ],
+                    ),
                   );
                 }
                 
@@ -342,6 +373,131 @@ class _StatisticsState extends State<Statistics> {
         ),
 
         SizedBox(height:10.0 ,),
+
+        //Search expense and income of a particular date
+        Container(
+          margin: EdgeInsets.only(left: 5.0, right: 5.0),
+          child: CustomCard(
+              cardHeight: _selectedDate !=null ? 350.0 : 200,
+              cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+              cardColor: cardColor,
+              gradientColor1: clipColor,
+              gradientColor2: cardColor,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  //Section Title
+                  CustomText(
+                    text: 'SEARCH FOR ANY RECORDS',
+                    textColor: Colors.white,
+                    fontFamily: 'open sans',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20.0,
+                  ),
+                  SizedBox(height: 10.0,),
+                  //Button to show datetime picker
+                  ButtonTheme(
+                    minWidth: 250.0,
+                    child: RaisedButton(
+                      child: Text('Select A Date',style: TextStyle(color: buttonTextColor),),
+                      color: buttonColor,
+                      padding: EdgeInsets.all(10.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0),),
+                      onPressed: ()  async {
+                        var selectedDate = await DatePicker().showDateTimePicker(context: context);
+                        setState(() {
+                          _selectedDate = selectedDate;
+                        });
+                      },
+                    ),
+                  ),
+
+                  SizedBox(height: 5.0,),
+
+                  _itemPrice2 != null ? Row(
+                    children: <Widget>[
+                       StreamBuilder<Income>(
+                          stream: DatabaseService(userId: user.uid).searchIncomeByDate(_selectedDate),
+                          builder: (context, snapshot) {
+                            var income =0;
+                            if(snapshot.hasData){
+                              income = snapshot.data.income;
+                            }
+                            return CustomText(
+                              text: ' $Income: $income',
+                              textColor: Colors.white,
+                              fontFamily: 'open sans',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15.0,
+                            );
+                          }
+                      ),
+
+                      SizedBox(width: 5.0,),
+
+                      //Item selected's price
+                      CustomText(
+                        text: '$_item2 : $_itemPrice2',
+                        textColor: Colors.white,
+                        fontFamily: 'open sans',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15.0,
+                      )
+                    ],
+                  ): Visibility(child: Text(''), visible: false,),
+
+                  //Show the results in graph
+                  _selectedDate != null ?
+                       StreamBuilder(
+                         stream: DatabaseService(userId: user.uid).searchExpenseByDateTime(scaffoldKey: widget.scaffoldKey, dateTime: _selectedDate),
+                         builder: (context,AsyncSnapshot<QuerySnapshot> snapshot){
+
+                           List<Expense> expenses = [];
+
+                           if(snapshot.hasData && snapshot.data.documents.isNotEmpty){
+
+                             int count = 0;
+
+                             for(var doc in snapshot.data.documents){
+                               var price = doc.data['Price'];
+                               var item = doc.data['Item'];
+
+                               count += 1;
+
+                               var expense = Expense(item: item,price: price,
+                                             barColor: count %2 ==0? charts.ColorUtil.fromDartColor(Colors.orange[900])
+                                                       :charts.ColorUtil.fromDartColor(Colors.purple)
+                                              );
+
+                               expenses.add(expense);
+                             }
+                             return Expanded(child: TodayGraph(data: expenses,onTodayGraphSelected: _onResultGraphSelected,));
+
+                           }else{
+
+                             return  CustomText(
+                               text: 'No records for selected date',
+                               textColor: Colors.white,
+                               fontFamily: 'open sans',
+                               fontWeight: FontWeight.w700,
+                               fontSize: 15.0,
+                             );
+                           }
+
+
+                         },
+                       )
+                      :Visibility(child: Text(''),visible: false,)
+
+                ],
+              )
+          ),
+        ),
+
+        SizedBox(height:10.0 ,),
+
+
 
 
 
