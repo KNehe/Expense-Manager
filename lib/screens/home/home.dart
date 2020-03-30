@@ -1,4 +1,5 @@
 import 'package:expensetracker/Constants/Colors.dart';
+import 'package:expensetracker/screens/account/account.dart';
 import 'package:expensetracker/screens/addExpense/addExpense.dart';
 import 'package:expensetracker/screens/statistics/statistics.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class _HomeState extends State<Home> {
     final tabs = [
       AddExpense(scaffoldKey: _scaffoldKey,),
       Statistics(scaffoldKey: _scaffoldKey,),
-      Center( child: Text('Account'),)
+      Account(scaffoldKey: _scaffoldKey,)
     ];
 
     return Scaffold(
