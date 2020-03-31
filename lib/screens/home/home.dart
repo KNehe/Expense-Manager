@@ -17,7 +17,7 @@ class _HomeState extends State<Home> {
 
   int _currentIndex = 0;
 
-  static final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState>_scaffoldKey = GlobalKey<ScaffoldState>();
 
 
   @override

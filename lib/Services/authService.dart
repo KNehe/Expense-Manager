@@ -31,8 +31,6 @@ class AuthService{
 
       saveToSharedPreferences();
 
-      Navigator.pushReplacementNamed(context,Home.id);
-
       return _userFromFireBaseUser(firebaseUser);
 
     } catch (signUpError) {
@@ -50,7 +48,6 @@ class AuthService{
 
       saveToSharedPreferences();
 
-      Navigator.pushReplacementNamed(context,Home.id);
 
       return _userFromFireBaseUser(firebaseUser);
 
@@ -101,6 +98,43 @@ class AuthService{
     bool loginState = prefs.getBool('loginState')?? false;
     return loginState;
   }
+
+  Future changeEmail(String email, GlobalKey<ScaffoldState> scaffoldKey,BuildContext context) async {
+
+    try {
+      FirebaseUser user = await _auth.currentUser();
+      await user.updateEmail(email);
+
+    } catch (changeEmailError) {
+      ErrorHandler.determineAuthError(changeEmailError, scaffoldKey);
+    }
+
+  }
+
+  Future changePassword(String password, GlobalKey<ScaffoldState> scaffoldKey,BuildContext context) async {
+
+    try {
+      FirebaseUser user = await _auth.currentUser();
+      await user.updatePassword(password);
+
+    } catch (changePasswordError) {
+      ErrorHandler.determineAuthError(changePasswordError, scaffoldKey);
+    }
+
+  }
+
+  Future deleteAccount(GlobalKey<ScaffoldState> scaffoldKey,BuildContext context) async {
+
+    try {
+      FirebaseUser user = await _auth.currentUser();
+      await user.delete();
+
+    } catch (changePasswordError) {
+      ErrorHandler.determineAuthError(changePasswordError, scaffoldKey);
+    }
+
+  }
+
 
 
 }//class

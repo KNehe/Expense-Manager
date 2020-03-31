@@ -18,7 +18,7 @@ import 'package:provider/provider.dart';
 
 class AddExpense extends StatefulWidget {
 
-  final GlobalKey scaffoldKey;
+  final GlobalKey<ScaffoldState> scaffoldKey;
   AddExpense({ @required this.scaffoldKey});
 
   @override

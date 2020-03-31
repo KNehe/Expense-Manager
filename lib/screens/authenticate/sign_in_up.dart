@@ -2,6 +2,7 @@ import 'package:expensetracker/Components/customClipPath.dart';
 import 'package:expensetracker/Components/customProgressDialog.dart';
 import 'package:expensetracker/Services/authService.dart';
 import 'package:expensetracker/screens/authenticate/forgotPassword.dart';
+import 'package:expensetracker/screens/home/home.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:expensetracker/Constants/Colors.dart';
@@ -132,17 +133,17 @@ class _SignInState extends State<SignIn> {
                    progressDialog.showDialog('Signing you in ...');
                    await _authService.signInUser(_email, _password, _scaffoldKey,context);
                    progressDialog.hideDialog();
+                   Navigator.pushReplacementNamed(context,Home.id);
                 }
               },
             ),
           ),
 
-        SizedBox( height: MediaQuery.of(context).size.width/11,),
+        SizedBox( height: 5.0),
 
         Container(
           width: MediaQuery.of(context).size.width,
-          margin: EdgeInsets.only(left: 35),
-          child: Row(
+          child: Column(
             children: <Widget>[
               FlatButton(
                 child: Text('Forgot password?', style: TextStyle(
@@ -152,6 +153,7 @@ class _SignInState extends State<SignIn> {
                   Navigator.pushNamed(context, ForgotPassword.id);
 
                 },
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
 
               FlatButton(
@@ -163,6 +165,7 @@ class _SignInState extends State<SignIn> {
                     _formShown = FormShown.signUpForm;
                   });
                 },
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
 
             ],
@@ -192,6 +195,7 @@ class _SignInState extends State<SignIn> {
                   progressDialog.showDialog('Signing you up ...');
                   await _authService.signUpUser(_email, _password,_scaffoldKey,context);
                   progressDialog.hideDialog();
+                  Navigator.pushReplacementNamed(context,Home.id);
 
                 }
               },
@@ -201,7 +205,6 @@ class _SignInState extends State<SignIn> {
         SizedBox( height: MediaQuery.of(context).size.width/12,),
 
           Container(
-            margin: EdgeInsets.only(left: 50),
             child: Center(
               child: FlatButton(
                 child: Text('Have an account ?',
@@ -212,6 +215,7 @@ class _SignInState extends State<SignIn> {
                     _formShown = FormShown.signInForm;
                   });
                 },
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
           )
