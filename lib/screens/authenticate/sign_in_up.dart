@@ -131,9 +131,15 @@ class _SignInState extends State<SignIn> {
 
                 if (saveAndValidate()) {
                    progressDialog.showDialog('Signing you in ...');
-                   await _authService.signInUser(_email, _password, _scaffoldKey,context);
-                   progressDialog.hideDialog();
-                   Navigator.pushReplacementNamed(context,Home.id);
+                   if(await _authService.signInUser(_email, _password, _scaffoldKey,context)){
+
+                     progressDialog.hideDialog();
+                     Navigator.pushReplacementNamed(context,Home.id);
+
+                   }else{
+                     progressDialog.hideDialog();
+                   }
+
                 }
               },
             ),
@@ -195,8 +201,6 @@ class _SignInState extends State<SignIn> {
                   progressDialog.showDialog('Signing you up ...');
                   await _authService.signUpUser(_email, _password,_scaffoldKey,context);
                   progressDialog.hideDialog();
-                  Navigator.pushReplacementNamed(context,Home.id);
-
                 }
               },
             ),

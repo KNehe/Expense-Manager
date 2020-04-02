@@ -3,8 +3,6 @@ import 'package:expensetracker/screens/authenticate/authenticate.dart';
 import 'package:expensetracker/screens/home/home.dart';
 import 'package:flutter/material.dart';
 
-import 'models/user.dart';
-
 class Wrapper extends StatefulWidget {
 
   static String id = 'wrapper';

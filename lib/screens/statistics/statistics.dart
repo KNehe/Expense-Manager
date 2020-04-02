@@ -38,7 +38,6 @@ class _StatisticsState extends State<Statistics> {
   var _itemPrice2;
   var _item2;
 
-
   _onTodayGraphSelected(charts.SelectionModel model){
 
     final selectedDatum = model.selectedDatum;
@@ -394,7 +393,9 @@ class _StatisticsState extends State<Statistics> {
                     fontWeight: FontWeight.w700,
                     fontSize: 20.0,
                   ),
+
                   SizedBox(height: 10.0,),
+
                   //Button to show datetime picker
                   ButtonTheme(
                     minWidth: 250.0,
@@ -407,6 +408,7 @@ class _StatisticsState extends State<Statistics> {
                       onPressed: ()  async {
                         var selectedDate = await DatePicker().showDateTimePicker(context: context);
                         setState(() {
+                          _itemPrice2 = null;
                           _selectedDate = selectedDate;
                         });
                       },
@@ -415,6 +417,7 @@ class _StatisticsState extends State<Statistics> {
 
                   SizedBox(height: 5.0,),
 
+                  //get income of selected item
                   _itemPrice2 != null ? Row(
                     children: <Widget>[
                        StreamBuilder<Income>(
@@ -425,7 +428,7 @@ class _StatisticsState extends State<Statistics> {
                               income = snapshot.data.income;
                             }
                             return CustomText(
-                              text: ' $Income: $income',
+                              text: 'Income: $income',
                               textColor: Colors.white,
                               fontFamily: 'open sans',
                               fontWeight: FontWeight.w500,
@@ -436,7 +439,7 @@ class _StatisticsState extends State<Statistics> {
 
                       SizedBox(width: 5.0,),
 
-                      //Item selected's price
+                      //Item selected and its price
                       CustomText(
                         text: '$_item2 : $_itemPrice2',
                         textColor: Colors.white,

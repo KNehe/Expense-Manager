@@ -23,18 +23,20 @@ class AuthService{
         .map(_userFromFireBaseUser);
   }
 
-  Future signInUser(String email, String password, GlobalKey<ScaffoldState> scaffoldKey,BuildContext context) async {
+  Future<bool> signInUser(String email, String password, GlobalKey<ScaffoldState> scaffoldKey,BuildContext context) async {
 
     try {
       AuthResult authResult = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser firebaseUser = authResult.user;
-
       saveToSharedPreferences();
 
-      return _userFromFireBaseUser(firebaseUser);
+      return true;
 
     } catch (signUpError) {
+
       ErrorHandler.determineAuthError(signUpError, scaffoldKey);
+
+      return false;
     }
 
   }
@@ -42,16 +44,17 @@ class AuthService{
   Future signUpUser(String email, String password,  GlobalKey<ScaffoldState> scaffoldKey,BuildContext context) async {
 
     try{
-
+//      print('credentials user is: $email $password');
       AuthResult authResult =  await _auth.createUserWithEmailAndPassword(email: email, password: password);
       FirebaseUser firebaseUser = authResult.user;
 
       saveToSharedPreferences();
 
 
-      return _userFromFireBaseUser(firebaseUser);
+      Navigator.pushReplacementNamed(context,Home.id);
 
     }catch(signUpError){
+//      print('firebase signin error is: $signUpError');
       ErrorHandler.determineAuthError(signUpError, scaffoldKey);
     }
   }

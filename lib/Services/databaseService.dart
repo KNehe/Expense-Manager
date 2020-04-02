@@ -110,57 +110,48 @@ class DatabaseService {
 
     List<WeekExpense> weekExpenses =  new List<WeekExpense>();
 
-    var day;
     var weekDayDate;
     int weekDay;
 
     for(int i = 0; i < DateTime.now().weekday ; i ++ ){
 
-      weekDay = DateTime.now().weekday;
-      day = (DateTime.now().day - i ).toString();
-
-      if(DateTime.now().month.toString().length == 1){
-        weekDayDate =  day + "-0" + DateTime.now().month.toString() + "-"  + DateTime.now().year.toString();
-      }else{
-        weekDayDate =  day + "-" + DateTime.now().month.toString() + "-"  + DateTime.now().year.toString();
-      }
+      var dateToday = DateTime.now().subtract(Duration(days: i));
+       weekDay = dateToday.weekday;
+       weekDayDate = formatDate(dateToday,[dd, '-', mm, '-', yyyy]);
 
 
       int totalExpenditure = 0;
 
       //get the expenses for each day and sum them
-       await reference.document(userId).collection(weekDayDate).document('Expenses')
+      await reference.document(userId).collection(weekDayDate).document('Expenses')
           .collection('Expenses').getDocuments().then((QuerySnapshot snapshot){
 
-         for(var doc in snapshot.documents){
-           if(doc.data.containsKey('Price'))
-           {
-             var price = doc.data['Price'];
-             totalExpenditure = totalExpenditure + price;
-           }else{
-             totalExpenditure = totalExpenditure + 0;
-           }
+        for(var doc in snapshot.documents){
+          if(doc.data.containsKey('Price'))
+          {
+            var price = doc.data['Price'];
+            totalExpenditure = totalExpenditure + price;
+          }else{
+            totalExpenditure = totalExpenditure + 0;
+          }
 
-         }
+        }
 
-         var weekExpense = WeekExpense(
-             weekDay: DateUtils().getWeekDayName(weekDay - i),
-             expenditure: totalExpenditure,
-             barColor: i %2 ==0? charts.ColorUtil.fromDartColor(Colors.orange[900])
-                 :charts.ColorUtil.fromDartColor(Colors.purple),
-             weekDayDate: weekDayDate
-         );
+        var weekExpense = WeekExpense(
+            weekDay: DateUtils().getWeekDayName(weekDay),
+            expenditure: totalExpenditure,
+            barColor: i %2 ==0? charts.ColorUtil.fromDartColor(Colors.orange[900])
+                :charts.ColorUtil.fromDartColor(Colors.purple),
+            weekDayDate: weekDayDate
+        );
 
-         weekExpenses.add( weekExpense);
-
-         if( i == DateTime.now().weekday) {
-           totalExpenditure = 0;
-         }
+        weekExpenses.add( weekExpense);
 
 
-       }).catchError((error){
-         ErrorHandler.determineError(error, scaffoldKey);
-       });
+
+      }).catchError((error){
+        ErrorHandler.determineError(error, scaffoldKey);
+      });
 
 
     }
@@ -185,29 +176,18 @@ class DatabaseService {
         .map(mapSnapshotToIncome);
   }
 
-  Stream<QuerySnapshot> searchExpenseByDateTime({@required GlobalKey<ScaffoldState> scaffoldKey, @required dynamic dateTime}) {
+  Stream<QuerySnapshot> searchExpenseByDateTime({@required GlobalKey<ScaffoldState> scaffoldKey, @required DateTime dateTime}) {
 
-    var searchValue;
-
-    if(dateTime.month.toString().length == 1){
-      searchValue = dateTime.day.toString() + '-0' + dateTime.month.toString()  + '-' + dateTime.year.toString();
-    }else{
-      searchValue = dateTime.day.toString() + '-' + dateTime.month.toString()  + '-' + dateTime.year.toString();
-    }
+    var searchValue = formatDate(dateTime,[dd, '-', mm, '-', yyyy]);
 
     return reference.document(userId).collection(searchValue).document('Expenses')
         .collection('Expenses').snapshots();
   }
 
-  Stream<Income> searchIncomeByDate(dynamic dateTime) {
+  Stream<Income> searchIncomeByDate(DateTime dateTime) {
 
-    var searchValue;
+    var searchValue = formatDate(dateTime,[dd, '-', mm, '-', yyyy]);
 
-    if(dateTime.month.toString().length == 1){
-      searchValue = dateTime.day.toString() + '-0' + dateTime.month.toString()  + '-' + dateTime.year.toString();
-    }else{
-      searchValue = dateTime.day.toString() + '-' + dateTime.month.toString()  + '-' + dateTime.year.toString();
-    }
     return reference.document(userId).collection(searchValue)
         .document('Income')
         .snapshots()

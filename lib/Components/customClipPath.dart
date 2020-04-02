@@ -9,7 +9,7 @@ class CustomClipPath extends StatelessWidget {
     return ClipPath(
               clipper: ClippingClass(),
               child: Container(
-                    height: MediaQuery.of(context).size.height/2.4,
+                    height: 250,
                     decoration: BoxDecoration(
               color: clipColor
                      ),
