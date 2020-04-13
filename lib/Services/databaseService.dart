@@ -2,12 +2,16 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
+import 'package:date_util/date_util.dart';
 import 'package:expensetracker/Components/customSnackbar.dart';
 import 'package:expensetracker/Utilities/errorHandler.dart';
 import 'package:expensetracker/Utilities/dateUtils.dart';
-import 'package:expensetracker/models/expense.dart';
 import 'package:expensetracker/models/income.dart';
+import 'package:expensetracker/models/monthExpense.dart';
+import 'package:expensetracker/models/range.dart';
+import 'package:expensetracker/models/weekDataSummary.dart';
 import 'package:expensetracker/models/weekExpense.dart';
+import 'package:expensetracker/models/weekMonthData.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
@@ -169,6 +173,7 @@ class DatabaseService {
 
   }
 
+  //when date is a String
   Stream<Income> getIncomeByDate(String date) {
     return reference.document(userId).collection(date)
         .document('Income')
@@ -184,6 +189,7 @@ class DatabaseService {
         .collection('Expenses').snapshots();
   }
 
+  //when date is  DateTime
   Stream<Income> searchIncomeByDate(DateTime dateTime) {
 
     var searchValue = formatDate(dateTime,[dd, '-', mm, '-', yyyy]);
@@ -193,6 +199,263 @@ class DatabaseService {
         .snapshots()
         .map(mapSnapshotToIncome);
   }
+
+  getThisMonthExpenditure(DateTime dateTime) async {
+
+
+    var dateUtility = DateUtil();
+
+    var no0fDaysInMonth = dateUtility.daysInMonth( dateTime.month, dateTime.year);
+
+    List<MonthExpense> monthExpenses = [];
+
+    var collection;
+
+    int totalExpenditure= 0;
+
+    
+    for( int i = 1 ; i <= no0fDaysInMonth ; i ++){
+
+     
+        collection =  DateUtils().formatIntDayValue(i) + '-'  + DateUtils().formatIntMonthValue( dateTime.month ) + '-'  + dateTime.year.toString();
+
+        await reference.document(userId).collection(collection).document('Expenses')
+            .collection('Expenses').getDocuments().then((QuerySnapshot snapshot) {
+
+
+                if(i <= 7){
+                  totalExpenditure = getExpenditureFromSnapshot(snapshot,totalExpenditure);
+                }
+
+                if( i == 7){
+
+                  var monthExpense = MonthExpense( weekName: 'Week 1',
+                                                  weekExpenditure: totalExpenditure,
+                                                  range:  Range(firstDay: 1,lastDay: 7),
+                                                  barColor: charts.ColorUtil.fromDartColor(Colors.orange[900])
+                                                  );
+
+                  monthExpenses.add(monthExpense);
+
+                  totalExpenditure = 0;
+                }
+
+                if( i > 7 && i  <= 14){
+                  totalExpenditure = getExpenditureFromSnapshot(snapshot,totalExpenditure);
+
+                }
+
+                if( i == 14){
+
+                  var monthExpense = MonthExpense( weekName: 'Week 2',
+                      weekExpenditure: totalExpenditure,
+                      range:  Range(firstDay: 8,lastDay: 14),
+                      barColor: charts.ColorUtil.fromDartColor(Colors.purple)
+                  );
+
+                  monthExpenses.add(monthExpense);
+
+                  totalExpenditure = 0;
+
+                }
+
+                if( i > 14 && i  <= 21 ){
+                  totalExpenditure = getExpenditureFromSnapshot(snapshot,totalExpenditure);
+
+                }
+
+                if( i == 21){
+
+                  var monthExpense = MonthExpense( weekName: 'Week 3',
+                      weekExpenditure: totalExpenditure,
+                      range:  Range(firstDay: 15,lastDay: 21),
+                      barColor: charts.ColorUtil.fromDartColor(Colors.orange[600])
+                  );
+
+                  monthExpenses.add(monthExpense);
+
+                  totalExpenditure = 0;
+                }
+
+                if( i > 21 && i  <= 28 ){
+                  totalExpenditure = getExpenditureFromSnapshot(snapshot,totalExpenditure);
+
+                }
+
+                if( i == 28){
+
+                  var monthExpense = MonthExpense( weekName: 'Week 4',
+                      weekExpenditure: totalExpenditure,
+                      range:  Range(firstDay: 22,lastDay: 28),
+                      barColor: charts.ColorUtil.fromDartColor(Colors.purple[400])
+                  );
+
+                  monthExpenses.add(monthExpense);
+
+                  totalExpenditure = 0;
+                }
+
+                if( i > 28 && i  <= 29 && no0fDaysInMonth == 29 ){
+
+                  totalExpenditure = getExpenditureFromSnapshot(snapshot,totalExpenditure);
+
+                  var monthExpense = MonthExpense( weekName: '29th',
+                      weekExpenditure: totalExpenditure,
+                      range:  Range(firstDay: 29,lastDay: 29),
+                      barColor: charts.ColorUtil.fromDartColor(Colors.orange)
+                  );
+
+                  monthExpenses.add(monthExpense);
+
+                  totalExpenditure = 0;
+
+                }
+
+                if( i > 28 && i  <= 30 && no0fDaysInMonth == 30 ){
+
+                  totalExpenditure = getExpenditureFromSnapshot(snapshot,totalExpenditure);
+
+                }
+
+                if(i == 30 && no0fDaysInMonth == 30 ){
+
+                  var monthExpense = MonthExpense( weekName: ' 29th - 30th',
+                      weekExpenditure: totalExpenditure,
+                      range:  Range(firstDay: 29,lastDay: 30),
+                      barColor: charts.ColorUtil.fromDartColor(Colors.purple[900])
+                  );
+
+                  monthExpenses.add(monthExpense);
+
+                  totalExpenditure = 0;
+                }
+
+                if( i > 28 && i  <= 31 && no0fDaysInMonth == 31 ){
+                  totalExpenditure = getExpenditureFromSnapshot(snapshot,totalExpenditure);
+
+                }
+
+                if(i == 31 ){
+
+                  var monthExpense = MonthExpense( weekName: ' 29th - 31st',
+                      weekExpenditure: totalExpenditure,
+                      range:  Range(firstDay: 29,lastDay: 31),
+                      barColor: charts.ColorUtil.fromDartColor(Colors.purple[900])
+                  );
+
+                  monthExpenses.add(monthExpense);
+
+
+                  totalExpenditure = 0;
+                }
+
+        });
+
+    }
+
+    return monthExpenses;
+
+  }
+
+  //called in the above method
+  //use to reduce boiler plate code
+  int getExpenditureFromSnapshot(QuerySnapshot snapshot ,totalExpenditure){
+
+    for(var doc in snapshot.documents){
+
+      if(doc.data.containsKey('Price'))
+      {
+        var price = doc.data['Price'];
+        totalExpenditure = totalExpenditure + price;
+
+      }else{
+
+        totalExpenditure = totalExpenditure + 0;
+
+      }
+
+    }
+    return totalExpenditure;
+
+  }
+
+  //get week data using range
+  getWeekDataFromRange({ WeekMonthData weekMonthData }) async {
+
+    Range range = DateUtils().getRangeFromWeekName(weekMonthData.weekName);
+
+    var collection;
+
+    List<WeekDataSummary> weekSummary = [];
+
+
+    for (int start = range.firstDay; start <= range.lastDay; start ++) {
+
+      collection = DateUtils().formatIntDayValue(start) + '-' +
+                   DateUtils().formatIntMonthValue(weekMonthData.dateTime.month) + '-'
+                  + weekMonthData.dateTime.year.toString();
+
+      await reference.document(weekMonthData.user.uid).collection(collection)
+          .document('Expenses')
+          .collection('Expenses').getDocuments()
+          .then((QuerySnapshot snapshot) {
+
+        for(var doc in snapshot.documents){
+
+          if(doc.data.containsKey('Price'))
+          {
+
+            var price = doc.data['Price'];
+            var item = doc.data['Item'];
+            var timeRecorded = doc.data['TimeRecorded'];
+            var dateRecorded = collection;
+
+            var weekDataSummary = WeekDataSummary(price: price, item:  item, timeRecorded:  timeRecorded, dateRecorded:  dateRecorded );
+
+            weekSummary.add(weekDataSummary);
+          }
+
+        }
+
+
+      });
+    }
+
+    return weekSummary;
+  }
+
+  //get total income using range
+  getWeekTotalIncome( { WeekMonthData weekMonthData}) async {
+
+    Range range = DateUtils().getRangeFromWeekName(weekMonthData.weekName);
+
+    var collection;
+
+    int totalIncome = 0;
+
+    for (int start = range.firstDay; start <= range.lastDay; start ++) {
+
+      collection = DateUtils().formatIntDayValue(start) + '-' +
+                   DateUtils().formatIntMonthValue(weekMonthData.dateTime.month) + '-'
+                   + weekMonthData.dateTime.year.toString();
+
+      await reference.document(weekMonthData.user.uid).collection(collection).document('Income')
+          .get().then((value) {
+
+        if (value.data == null) {
+          totalIncome = totalIncome + 0;
+
+        } else {
+          totalIncome = totalIncome + value.data['Income'];
+        }
+
+      });
+    }
+
+    return totalIncome;
+  }
+
+
 
 
 

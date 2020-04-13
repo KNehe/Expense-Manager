@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date_format/date_format.dart';
+import 'package:date_util/date_util.dart';
 import 'package:expensetracker/Components/customCard.dart';
 import 'package:expensetracker/Components/customText.dart';
 import 'package:expensetracker/Components/datePicker.dart';
+import 'package:expensetracker/Components/monthGraph.dart';
 import 'package:expensetracker/Components/todayGraph.dart';
 import 'package:expensetracker/Components/weekDaySummary.dart';
 import 'package:expensetracker/Components/weekGraph.dart';
@@ -10,9 +13,13 @@ import 'package:expensetracker/Services/databaseService.dart';
 import 'package:expensetracker/models/expense.dart';
 import 'package:expensetracker/models/income.dart';
 import 'package:expensetracker/models/user.dart';
+import 'package:expensetracker/models/weekMonthData.dart';
+import 'package:expensetracker/screens/statistics/weekMonth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:flutter/rendering.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:provider/provider.dart';
 
 
@@ -20,6 +27,8 @@ class Statistics extends StatefulWidget {
 
   final GlobalKey<ScaffoldState> scaffoldKey;
   Statistics({this.scaffoldKey});
+
+  final DateTime initialDate = DateTime.now();
 
 
   @override
@@ -30,6 +39,8 @@ class _StatisticsState extends State<Statistics> {
 
   Future _getThisWeekExpenditure;
 
+  Future _getThisMonthExpenditure;
+
   var _itemPrice;
   var _item;
 
@@ -37,6 +48,8 @@ class _StatisticsState extends State<Statistics> {
 
   var _itemPrice2;
   var _item2;
+
+  DateTime _selectedDateFromMonthYearPicker;
 
   _onTodayGraphSelected(charts.SelectionModel model){
 
@@ -98,16 +111,58 @@ class _StatisticsState extends State<Statistics> {
     });
   }
 
+  _onMonthGraphSelected(charts.SelectionModel model){
+
+    final selectedDatum = model.selectedDatum;
+
+    var weekName;
+    var weekExpenditure;
+
+    final user = Provider.of<User>(context,listen: false);
+
+    if(selectedDatum.isNotEmpty){
+      weekName = selectedDatum.first.datum.weekName;
+      weekExpenditure = selectedDatum.first.datum.weekExpenditure;
+
+    }
+
+    if(weekName.toString().isNotEmpty || weekName != null){
+
+      var data = WeekMonthData(weekName: weekName, dateTime: _selectedDateFromMonthYearPicker, user: user, expenditure: weekExpenditure);
+
+      Navigator.push(context, MaterialPageRoute(builder:  (context) => WeekMonth(weekMonthData: data,)));
+    }
+
+  }
+
 
   @override
   void initState() {
     super.initState();
 
+    _selectedDateFromMonthYearPicker = widget.initialDate;
+
     final user = Provider.of<User>(context,listen: false);
 
     _getThisWeekExpenditure = DatabaseService(userId:  user.uid).getThisWeekExpenditure(widget.scaffoldKey);
+
+    _getThisMonthExpenditure = getThisMonthExpenditure(user);
+
+
   }
 
+  getThisMonthExpenditure(User user){
+
+    return DatabaseService(userId:  user.uid).getThisMonthExpenditure(_selectedDateFromMonthYearPicker);
+  }
+
+  void refreshMonthExpenditure(User user){
+
+    setState(() {
+      _getThisMonthExpenditure = getThisMonthExpenditure(user);
+    });
+
+  }
 
 
   @override
@@ -373,6 +428,151 @@ class _StatisticsState extends State<Statistics> {
 
         SizedBox(height:10.0 ,),
 
+        //this month's graph
+        Container(
+          margin: EdgeInsets.fromLTRB(5, 5, 5, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              FutureBuilder(
+                future:  _getThisMonthExpenditure ,
+                builder: (context,snapshot){
+                  switch(snapshot.connectionState){
+                    case ConnectionState.active:
+                    case ConnectionState.waiting:
+                      return CustomCard(
+                        cardHeight: 300.0,
+                        cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                        cardColor: cardColor,
+                        gradientColor1: clipColor,
+                        gradientColor2: cardColor,
+                        child: Column(
+                          children: <Widget>[
+                            CustomText(
+                              text: 'MONTHLY EXPENDITURE',
+                              textColor: Colors.white,
+                              fontFamily: 'open sans',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20.0,
+                            ),
+                            SizedBox(height: 5.0,),
+                            Center(
+                                child:  CircularProgressIndicator(backgroundColor: scaffoldBackgroundColor,)
+                            ),
+                          ],
+                        ),
+                      );
+                    case ConnectionState.none:
+                    case ConnectionState.done:
+
+                      if(!snapshot.hasData ){
+                        return CustomCard(
+                          cardHeight: 300.0,
+                          cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                          cardColor: cardColor,
+                          gradientColor1: clipColor,
+                          gradientColor2: cardColor,
+                          child: Column(
+                            children: <Widget>[
+                              CustomText(
+                                text: 'MONTHLY EXPENDITURE',
+                                textColor: Colors.white,
+                                fontFamily: 'open sans',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20.0,
+                              ),
+
+                              SizedBox(height: 5.0,),
+
+                              CustomText(
+                                text: 'No expenses recorded',
+                                textColor: Colors.white,
+                                fontFamily: 'open sans',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20.0,
+                              )
+
+                            ],
+                          ),
+                        );
+                      }
+
+                      if(snapshot.hasData){
+                        var data = snapshot.data;
+                        return CustomCard(
+                          cardHeight: 300,
+                          cardPadding: EdgeInsets.fromLTRB(10,10, 10, 0),
+                          cardColor: cardColor,
+                          gradientColor1: clipColor,
+                          gradientColor2: cardColor,
+                          child: Column(
+                            children: <Widget>[
+
+                              SizedBox(height:5.0 ,),
+
+                              CustomText(
+                                text: 'Year: ${_selectedDateFromMonthYearPicker.year} Month: ${ DateUtil().month(_selectedDateFromMonthYearPicker.month)}',
+                                textColor: Colors.white,
+                                fontFamily: 'open sans',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15.0,
+                              ),
+
+                              ButtonTheme(
+                                minWidth: 250.0,
+                                child: RaisedButton(
+                                  child: Text('Change year and month',style: TextStyle(color: buttonTextColor),),
+                                  color: buttonColor,
+                                  padding: EdgeInsets.all(10.0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),),
+                                  onPressed: () {
+                                    showMonthPicker(
+                                      context: context,
+                                      initialDate: _selectedDateFromMonthYearPicker ?? widget.initialDate,
+                                      firstDate: DateTime(DateTime.now().year - 1, 5),
+                                      lastDate: DateTime(DateTime.now().year + 1, 9),
+                                    ).then( (date){
+                                      if( date != null){
+                                        setState(() {
+                                          _selectedDateFromMonthYearPicker = date;
+                                        });
+                                        refreshMonthExpenditure(user);
+                                      }
+
+                                    });
+
+                                  },
+                                ),
+                              ),
+
+                              SizedBox(height:5.0 ,),
+
+                              //Graph Title
+                              CustomText(
+                                text: 'MONTHLY EXPENDITURE',
+                                textColor: Colors.white,
+                                fontFamily: 'open sans',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20.0,
+                              ),
+
+                              Expanded(child: MonthGraph(data: data, onMonthGraphSelected: _onMonthGraphSelected,)),
+                            ],
+                          ),
+                        );
+                      }
+
+                  }
+                  return  Center( child: Text('No Content'),);
+                },
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height:10.0 ,),
+
         //Search expense and income of a particular date
         Container(
           margin: EdgeInsets.only(left: 5.0, right: 5.0),
@@ -501,11 +701,7 @@ class _StatisticsState extends State<Statistics> {
         SizedBox(height:10.0 ,),
 
 
-
-
-
-
-
+        SizedBox(height:10.0 ,),
 
       ],
     );
