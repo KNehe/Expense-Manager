@@ -26,7 +26,7 @@ import 'package:provider/provider.dart';
 class Statistics extends StatefulWidget {
 
   final GlobalKey<ScaffoldState> scaffoldKey;
-  Statistics({this.scaffoldKey});
+  Statistics({ Key key, this.scaffoldKey}) : super(key :key);
 
   final DateTime initialDate = DateTime.now();
 

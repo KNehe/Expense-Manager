@@ -19,7 +19,7 @@ import 'package:provider/provider.dart';
 class Account extends StatefulWidget {
 
   final GlobalKey<ScaffoldState> scaffoldKey;
-  Account({@required this.scaffoldKey});
+  Account({ Key key , @required this.scaffoldKey}) : super(key:key);
 
   @override
   _AccountState createState() => _AccountState();

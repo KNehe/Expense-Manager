@@ -1,8 +1,10 @@
 import 'package:expensetracker/Constants/Colors.dart';
+import 'package:expensetracker/models/bottomNavProvider.dart';
 import 'package:expensetracker/screens/account/account.dart';
 import 'package:expensetracker/screens/addExpense/addExpense.dart';
 import 'package:expensetracker/screens/statistics/statistics.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 
 class Home extends StatefulWidget {
@@ -15,28 +17,47 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  int _currentIndex = 0;
+  List<Widget> tabs;
+
+
 
   final GlobalKey<ScaffoldState>_scaffoldKey = GlobalKey<ScaffoldState>();
 
+  final Key addExpenseKey = PageStorageKey('addExpenseKey');
+  final Key statisticsKey = PageStorageKey('statisticsKey');
+  final Key accountKey = PageStorageKey('accountKey');
+
+  final PageStorageBucket bucket = PageStorageBucket();
+
+  @override
+  void initState() {
+
+    tabs  = [
+            AddExpense( key: addExpenseKey, scaffoldKey: _scaffoldKey,),
+            Statistics( key: statisticsKey, scaffoldKey: _scaffoldKey,),
+            Account( key: accountKey, scaffoldKey: _scaffoldKey,)
+          ];
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
 
-    final tabs = [
-      AddExpense(scaffoldKey: _scaffoldKey,),
-      Statistics(scaffoldKey: _scaffoldKey,),
-      Account(scaffoldKey: _scaffoldKey,)
-    ];
+    var bottomNavProvider = Provider.of<BottomNavigationProvider>(context);
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: scaffoldBackgroundColor,
-      body: SafeArea(
-          child: tabs[_currentIndex],
+      body: PageStorage(
+        child: SafeArea(
+            child: tabs[ bottomNavProvider.currentIndex ],
+        ),
+        bucket: bucket,
       ),
+
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: bottomNavProvider.currentIndex,
         items: [
            BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -51,7 +72,9 @@ class _HomeState extends State<Home> {
             title: Text('Account')
           )
         ],
-        onTap: (index) => setState( ()=> _currentIndex = index ),
+        onTap: (index) => setState( (){
+          bottomNavProvider.currentIndex = index;
+        }),
         backgroundColor: bottomNavigationBackgroundColor,
         selectedItemColor: buttonColor,
         unselectedItemColor: clipColor,
