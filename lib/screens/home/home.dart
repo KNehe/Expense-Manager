@@ -1,10 +1,8 @@
 import 'package:expensetracker/Constants/Colors.dart';
-import 'package:expensetracker/models/bottomNavProvider.dart';
 import 'package:expensetracker/screens/account/account.dart';
 import 'package:expensetracker/screens/addExpense/addExpense.dart';
 import 'package:expensetracker/screens/statistics/statistics.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   static String id = 'Home';
@@ -26,6 +24,8 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
+    super.initState();
+
     tabs = [
       AddExpense(
         key: addExpenseKey,
@@ -40,25 +40,29 @@ class _HomeState extends State<Home> {
         scaffoldKey: _scaffoldKey,
       )
     ];
+  }
 
-    super.initState();
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    var bottomNavProvider = Provider.of<BottomNavigationProvider>(context);
-
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: scaffoldBackgroundColor,
       body: PageStorage(
         child: SafeArea(
-          child: tabs[bottomNavProvider.currentIndex],
+          child: tabs[_selectedIndex],
         ),
         bucket: bucket,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: bottomNavProvider.currentIndex,
+        currentIndex: _selectedIndex,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Statistics'),
@@ -67,9 +71,7 @@ class _HomeState extends State<Home> {
             label: 'Account',
           )
         ],
-        onTap: (index) => setState(() {
-          bottomNavProvider.currentIndex = index;
-        }),
+        onTap: _onItemTapped,
         backgroundColor: bottomNavigationBackgroundColor,
         selectedItemColor: buttonColor,
         unselectedItemColor: clipColor,
