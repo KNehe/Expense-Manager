@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:date_format/date_format.dart';
 import 'package:date_util/date_util.dart';
 import 'package:expensetracker/Components/customCard.dart';
 import 'package:expensetracker/Components/customText.dart';
@@ -22,21 +21,17 @@ import 'package:flutter/rendering.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:provider/provider.dart';
 
-
 class Statistics extends StatefulWidget {
-
   final GlobalKey<ScaffoldState> scaffoldKey;
-  Statistics({ Key key, this.scaffoldKey}) : super(key :key);
+  Statistics({Key key, this.scaffoldKey}) : super(key: key);
 
   final DateTime initialDate = DateTime.now();
-
 
   @override
   _StatisticsState createState() => _StatisticsState();
 }
 
 class _StatisticsState extends State<Statistics> {
-
   Future _getThisWeekExpenditure;
 
   Future _getThisMonthExpenditure;
@@ -51,8 +46,7 @@ class _StatisticsState extends State<Statistics> {
 
   DateTime _selectedDateFromMonthYearPicker;
 
-  _onTodayGraphSelected(charts.SelectionModel model){
-
+  _onTodayGraphSelected(charts.SelectionModel model) {
     final selectedDatum = model.selectedDatum;
 
     var itemPrice;
@@ -69,32 +63,33 @@ class _StatisticsState extends State<Statistics> {
     });
   }
 
-  _onWeekGraphSelected(charts.SelectionModel model){
-
+  _onWeekGraphSelected(charts.SelectionModel model) {
     final selectedDatum = model.selectedDatum;
 
     var expenditure;
     var weekDayDate;
     var weekDay;
 
-    if(selectedDatum.isNotEmpty){
+    if (selectedDatum.isNotEmpty) {
       expenditure = selectedDatum.first.datum.expenditure;
       weekDayDate = selectedDatum.first.datum.weekDayDate;
       weekDay = selectedDatum.first.datum.weekDay;
     }
 
-    final user = Provider.of<User>(context,listen: false);
+    final user = Provider.of<User>(context, listen: false);
 
-    if(expenditure != 0 && expenditure != null){
-     WeekDaySummary(user: user,scaffoldKey: widget.scaffoldKey,
-                    weekDay:  weekDay, expenditure: expenditure,
-                    weekDayDate: weekDayDate).showWeekDaySummary();
+    if (expenditure != 0 && expenditure != null) {
+      WeekDaySummary(
+              user: user,
+              scaffoldKey: widget.scaffoldKey,
+              weekDay: weekDay,
+              expenditure: expenditure,
+              weekDayDate: weekDayDate)
+          .showWeekDaySummary();
     }
-
   }
 
-  _onResultGraphSelected(charts.SelectionModel model){
-
+  _onResultGraphSelected(charts.SelectionModel model) {
     final selectedDatum = model.selectedDatum;
 
     var itemPrice;
@@ -111,30 +106,34 @@ class _StatisticsState extends State<Statistics> {
     });
   }
 
-  _onMonthGraphSelected(charts.SelectionModel model){
-
+  _onMonthGraphSelected(charts.SelectionModel model) {
     final selectedDatum = model.selectedDatum;
 
     var weekName;
     var weekExpenditure;
 
-    final user = Provider.of<User>(context,listen: false);
+    final user = Provider.of<User>(context, listen: false);
 
-    if(selectedDatum.isNotEmpty){
+    if (selectedDatum.isNotEmpty) {
       weekName = selectedDatum.first.datum.weekName;
       weekExpenditure = selectedDatum.first.datum.weekExpenditure;
-
     }
 
-    if(weekName.toString().isNotEmpty || weekName != null){
+    if (weekName.toString().isNotEmpty || weekName != null) {
+      var data = WeekMonthData(
+          weekName: weekName,
+          dateTime: _selectedDateFromMonthYearPicker,
+          user: user,
+          expenditure: weekExpenditure);
 
-      var data = WeekMonthData(weekName: weekName, dateTime: _selectedDateFromMonthYearPicker, user: user, expenditure: weekExpenditure);
-
-      Navigator.push(context, MaterialPageRoute(builder:  (context) => WeekMonth(weekMonthData: data,)));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => WeekMonth(
+                    weekMonthData: data,
+                  )));
     }
-
   }
-
 
   @override
   void initState() {
@@ -142,77 +141,72 @@ class _StatisticsState extends State<Statistics> {
 
     _selectedDateFromMonthYearPicker = widget.initialDate;
 
-    final user = Provider.of<User>(context,listen: false);
+    final user = Provider.of<User>(context, listen: false);
 
-    _getThisWeekExpenditure = DatabaseService(userId:  user.uid).getThisWeekExpenditure(widget.scaffoldKey);
+    _getThisWeekExpenditure = DatabaseService(userId: user.uid)
+        .getThisWeekExpenditure(widget.scaffoldKey);
 
     _getThisMonthExpenditure = getThisMonthExpenditure(user);
-
-
   }
 
-  getThisMonthExpenditure(User user){
-
-    return DatabaseService(userId:  user.uid).getThisMonthExpenditure(_selectedDateFromMonthYearPicker);
+  getThisMonthExpenditure(User user) {
+    return DatabaseService(userId: user.uid)
+        .getThisMonthExpenditure(_selectedDateFromMonthYearPicker);
   }
 
-  void refreshMonthExpenditure(User user){
-
+  void refreshMonthExpenditure(User user) {
     setState(() {
       _getThisMonthExpenditure = getThisMonthExpenditure(user);
     });
-
   }
-
 
   @override
   Widget build(BuildContext context) {
-
     final user = Provider.of<User>(context);
 
     return ListView(
       children: <Widget>[
-
         //today's statistics
         StreamBuilder(
-              stream: DatabaseService(userId: user.uid).getTodayStats,
-              builder: (context,AsyncSnapshot<QuerySnapshot> snapshot){
+          stream: DatabaseService(userId: user.uid).getTodayStats,
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            final List<Expense> todayExpenses = [];
+            int totalExpenses = 0;
 
-                final List<Expense> todayExpenses =[];
-                int totalExpenses = 0;
+            if (snapshot.hasData) {
+              int count = 0;
+              for (var doc in snapshot.data.documents) {
+                final itemName = doc['Item'];
+                final itemPrice = doc['Price'];
 
-                if(snapshot .hasData ){
-                  int count = 0;
-                    for(var doc in snapshot.data.documents) {
-                      final itemName = doc['Item'];
-                      final itemPrice = doc['Price'];
+                totalExpenses += itemPrice;
 
-                      totalExpenses += itemPrice;
+                count += 1;
 
-                      count +=1;
+                final expense = Expense(
+                    item: '$itemName',
+                    price: itemPrice,
+                    barColor: count % 2 == 0
+                        ? charts.ColorUtil.fromDartColor(Colors.orange[900])
+                        : charts.ColorUtil.fromDartColor(Colors.purple));
 
-                     final expense = Expense(
-                          item: '$itemName',
-                          price: itemPrice,
-                          barColor: count %2 ==0? charts.ColorUtil.fromDartColor(Colors.orange[900]) :charts.ColorUtil.fromDartColor(Colors.purple)
-                      );
-
-                     todayExpenses.add(expense);
-
-                    }
+                todayExpenses.add(expense);
+              }
 //loop
-                }
+            }
 
-                if(!snapshot.hasData || snapshot.data.documents.isEmpty || snapshot.data.documents.length == 0){
-                  return Container(
-                    margin: EdgeInsets.only(left: 5.0,right: 5.0,top: 10.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-
-                        SizedBox(height: 10.0,),
-
-                        CustomCard(
+            if (!snapshot.hasData ||
+                snapshot.data.documents.isEmpty ||
+                snapshot.data.documents.length == 0) {
+              return Container(
+                margin: EdgeInsets.only(left: 5.0, right: 5.0, top: 10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    CustomCard(
                         cardHeight: 300.0,
                         cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
                         cardColor: cardColor,
@@ -220,7 +214,6 @@ class _StatisticsState extends State<Statistics> {
                         gradientColor2: cardColor,
                         child: Column(
                           children: <Widget>[
-
                             CustomText(
                               text: 'TODAY\'S STATISICS',
                               textColor: Colors.white,
@@ -228,9 +221,7 @@ class _StatisticsState extends State<Statistics> {
                               fontWeight: FontWeight.w700,
                               fontSize: 20.0,
                             ),
-
-                            SizedBox(height:15.0),
-
+                            SizedBox(height: 15.0),
                             CustomText(
                               text: 'You haven\'t recorded any expenses today!',
                               textColor: Colors.white,
@@ -238,103 +229,113 @@ class _StatisticsState extends State<Statistics> {
                               fontWeight: FontWeight.w400,
                               fontSize: 15.0,
                             ),
-
                           ],
-                        )
-                    )
-                      ],
-                    ),
-                  );
-                }
-                
-                return  Container(
-                  margin: EdgeInsets.only(left: 5.0,right: 5.0,top: 10.0),
-                  child: CustomCard(
-                      cardHeight: 300.0,
-                      cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-                      cardColor: clipColor,
-                      gradientColor1: clipColor,
-                      gradientColor2: clipColor,
-                      child: Column(
+                        ))
+                  ],
+                ),
+              );
+            }
+
+            return Container(
+              margin: EdgeInsets.only(left: 5.0, right: 5.0, top: 10.0),
+              child: CustomCard(
+                  cardHeight: 300.0,
+                  cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  cardColor: clipColor,
+                  gradientColor1: clipColor,
+                  gradientColor2: clipColor,
+                  child: Column(
+                    children: <Widget>[
+                      //Title
+                      CustomText(
+                        text: 'TODAY\'S STATISICS',
+                        textColor: Colors.white,
+                        fontFamily: 'open sans',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 20.0,
+                      ),
+
+                      SizedBox(
+                        height: 15.0,
+                      ),
+                      //Show Income and Expenditure
+                      Row(
                         children: <Widget>[
-                          //Title
-                          CustomText(
-                            text: 'TODAY\'S STATISICS',
-                            textColor: Colors.white,
-                            fontFamily: 'open sans',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20.0,
-                          ),
-
-                          SizedBox(height: 15.0,),
-                          //Show Income and Expenditure
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: StreamBuilder<Income>(
-                                  stream: DatabaseService(userId: user.uid).getIncome,
-                                  builder: (context, snapshot) {
-                                    var income =0;
-                                    if(snapshot.hasData){
-                                      income = snapshot.data.income;
-                                    }
-                                    return CustomText(
-                                      text: 'Income: $income',
-                                      textColor: Colors.white,
-                                      fontFamily: 'open sans',
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 15.0,
-                                    );
+                          Expanded(
+                            child: StreamBuilder<Income>(
+                                stream:
+                                    DatabaseService(userId: user.uid).getIncome,
+                                builder: (context, snapshot) {
+                                  var income = 0;
+                                  if (snapshot.hasData) {
+                                    income = snapshot.data.income;
                                   }
-                                ),
-                              ),
-
-                              Expanded(
-                                child: CustomText(
-                                  text: 'Expenditure: $totalExpenses',
-                                  textColor: Colors.white,
-                                  fontFamily: 'open sans',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 15.0,
-                                ),
-                              ),
-
-                            ],
+                                  return CustomText(
+                                    text: 'Income: $income',
+                                    textColor: Colors.white,
+                                    fontFamily: 'open sans',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15.0,
+                                  );
+                                }),
                           ),
+                          Expanded(
+                            child: CustomText(
+                              text: 'Expenditure: $totalExpenses',
+                              textColor: Colors.white,
+                              fontFamily: 'open sans',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15.0,
+                            ),
+                          ),
+                        ],
+                      ),
 
-                          SizedBox(height: 15.0,),
+                      SizedBox(
+                        height: 15.0,
+                      ),
 
-                          //Graph
-                          Expanded(child: TodayGraph(data: todayExpenses,onTodayGraphSelected: _onTodayGraphSelected,)),
+                      //Graph
+                      Expanded(
+                          child: TodayGraph(
+                        data: todayExpenses,
+                        onTodayGraphSelected: _onTodayGraphSelected,
+                      )),
 
-                          //Item selected's price
-                          _itemPrice != null ? CustomText(
-                          text: '$_item : $_itemPrice',
-                          textColor: Colors.white,
-                          fontFamily: 'open sans',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 15.0,
-                          ): Visibility(child: Text(''), visible: false,),
+                      //Item selected's price
+                      _itemPrice != null
+                          ? CustomText(
+                              text: '$_item : $_itemPrice',
+                              textColor: Colors.white,
+                              fontFamily: 'open sans',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15.0,
+                            )
+                          : Visibility(
+                              child: Text(''),
+                              visible: false,
+                            ),
 
-                          SizedBox(height:10.0),
-                        ],)
-                  ),
-                );
+                      SizedBox(height: 10.0),
+                    ],
+                  )),
+            );
+          },
+        ),
 
-              },
-            ),
-
-        SizedBox(height:10.0 ,),
+        SizedBox(
+          height: 10.0,
+        ),
 
         //this week's statistics
         FutureBuilder(
-          future: _getThisWeekExpenditure ,
-          builder: (context,snapshot){
-            switch(snapshot.connectionState){
+          future: _getThisWeekExpenditure,
+          builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
               case ConnectionState.active:
               case ConnectionState.waiting:
                 return Container(
-                    margin: EdgeInsets.only(left: 5.0,right: 5.0),
+                    margin: EdgeInsets.only(left: 5.0, right: 5.0),
                     child: CustomCard(
                         cardHeight: 300.0,
                         cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -350,52 +351,51 @@ class _StatisticsState extends State<Statistics> {
                               fontWeight: FontWeight.w700,
                               fontSize: 20.0,
                             ),
-                            SizedBox(height: 5.0,),
-                            Center(
-                              child:  CircularProgressIndicator(backgroundColor: scaffoldBackgroundColor,)
+                            SizedBox(
+                              height: 5.0,
                             ),
+                            Center(
+                                child: CircularProgressIndicator(
+                              backgroundColor: scaffoldBackgroundColor,
+                            )),
                           ],
-                        )
-                    )
-                );
+                        )));
               case ConnectionState.none:
               case ConnectionState.done:
+                if (!snapshot.hasData) {
+                  return Container(
+                    margin: EdgeInsets.only(left: 5.0, right: 5.0),
+                    child: CustomCard(
+                        cardHeight: 200.0,
+                        cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                        cardColor: cardColor,
+                        gradientColor1: clipColor,
+                        gradientColor2: cardColor,
+                        child: Column(
+                          children: <Widget>[
+                            CustomText(
+                              text: 'THIS WEEK\'S EXPENDITURE',
+                              textColor: Colors.white,
+                              fontFamily: 'open sans',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20.0,
+                            ),
+                            SizedBox(
+                              height: 5.0,
+                            ),
+                            CustomText(
+                              text: 'No expenses recorded this week',
+                              textColor: Colors.white,
+                              fontFamily: 'open sans',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20.0,
+                            )
+                          ],
+                        )),
+                  );
+                }
 
-              if(!snapshot.hasData ){
-                return Container(
-                  margin: EdgeInsets.only(left: 5.0, right: 5.0),
-                  child: CustomCard(
-                      cardHeight: 200.0,
-                      cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-                      cardColor: cardColor,
-                      gradientColor1: clipColor,
-                      gradientColor2: cardColor,
-                      child: Column(
-                        children: <Widget>[
-                          CustomText(
-                            text: 'THIS WEEK\'S EXPENDITURE',
-                            textColor: Colors.white,
-                            fontFamily: 'open sans',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20.0,
-                          ),
-
-                          SizedBox(height: 5.0,),
-
-                          CustomText(
-                            text: 'No expenses recorded this week',
-                            textColor: Colors.white,
-                            fontFamily: 'open sans',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20.0,
-                          )
-
-                        ],
-                      )),
-                );
-              }
-
-              if(snapshot.hasData){
+                if (snapshot.hasData) {
                   var data = snapshot.data;
                   return Container(
                     margin: EdgeInsets.only(left: 5.0, right: 5.0),
@@ -415,18 +415,25 @@ class _StatisticsState extends State<Statistics> {
                               fontWeight: FontWeight.w700,
                               fontSize: 20.0,
                             ),
-                            Expanded(child: WeekGraph(data: data,onWeekGraphSelected: _onWeekGraphSelected,)),
+                            Expanded(
+                                child: WeekGraph(
+                              data: data,
+                              onWeekGraphSelected: _onWeekGraphSelected,
+                            )),
                           ],
                         )),
                   );
                 }
-
             }
-            return  Center( child: Text('No Content'),);
+            return Center(
+              child: Text('No Content'),
+            );
           },
         ),
 
-        SizedBox(height:10.0 ,),
+        SizedBox(
+          height: 10.0,
+        ),
 
         //this month's graph
         Container(
@@ -435,9 +442,9 @@ class _StatisticsState extends State<Statistics> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               FutureBuilder(
-                future:  _getThisMonthExpenditure ,
-                builder: (context,snapshot){
-                  switch(snapshot.connectionState){
+                future: _getThisMonthExpenditure,
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
                     case ConnectionState.active:
                     case ConnectionState.waiting:
                       return CustomCard(
@@ -455,17 +462,19 @@ class _StatisticsState extends State<Statistics> {
                               fontWeight: FontWeight.w700,
                               fontSize: 20.0,
                             ),
-                            SizedBox(height: 5.0,),
-                            Center(
-                                child:  CircularProgressIndicator(backgroundColor: scaffoldBackgroundColor,)
+                            SizedBox(
+                              height: 5.0,
                             ),
+                            Center(
+                                child: CircularProgressIndicator(
+                              backgroundColor: scaffoldBackgroundColor,
+                            )),
                           ],
                         ),
                       );
                     case ConnectionState.none:
                     case ConnectionState.done:
-
-                      if(!snapshot.hasData ){
+                      if (!snapshot.hasData) {
                         return CustomCard(
                           cardHeight: 300.0,
                           cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -481,9 +490,9 @@ class _StatisticsState extends State<Statistics> {
                                 fontWeight: FontWeight.w700,
                                 fontSize: 20.0,
                               ),
-
-                              SizedBox(height: 5.0,),
-
+                              SizedBox(
+                                height: 5.0,
+                              ),
                               CustomText(
                                 text: 'No expenses recorded',
                                 textColor: Colors.white,
@@ -491,27 +500,28 @@ class _StatisticsState extends State<Statistics> {
                                 fontWeight: FontWeight.w700,
                                 fontSize: 20.0,
                               )
-
                             ],
                           ),
                         );
                       }
 
-                      if(snapshot.hasData){
+                      if (snapshot.hasData) {
                         var data = snapshot.data;
                         return CustomCard(
                           cardHeight: 300,
-                          cardPadding: EdgeInsets.fromLTRB(10,10, 10, 0),
+                          cardPadding: EdgeInsets.fromLTRB(10, 10, 10, 0),
                           cardColor: cardColor,
                           gradientColor1: clipColor,
                           gradientColor2: cardColor,
                           child: Column(
                             children: <Widget>[
-
-                              SizedBox(height:5.0 ,),
+                              SizedBox(
+                                height: 5.0,
+                              ),
 
                               CustomText(
-                                text: 'Year: ${_selectedDateFromMonthYearPicker.year} Month: ${ DateUtil().month(_selectedDateFromMonthYearPicker.month)}',
+                                text:
+                                    'Year: ${_selectedDateFromMonthYearPicker.year} Month: ${DateUtil().month(_selectedDateFromMonthYearPicker.month)}',
                                 textColor: Colors.white,
                                 fontFamily: 'open sans',
                                 fontWeight: FontWeight.w700,
@@ -521,32 +531,41 @@ class _StatisticsState extends State<Statistics> {
                               ButtonTheme(
                                 minWidth: 250.0,
                                 child: RaisedButton(
-                                  child: Text('Change year and month',style: TextStyle(color: buttonTextColor),),
+                                  child: Text(
+                                    'Change year and month',
+                                    style: TextStyle(color: buttonTextColor),
+                                  ),
                                   color: buttonColor,
                                   padding: EdgeInsets.all(10.0),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20.0),),
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
                                   onPressed: () {
                                     showMonthPicker(
                                       context: context,
-                                      initialDate: _selectedDateFromMonthYearPicker ?? widget.initialDate,
-                                      firstDate: DateTime(DateTime.now().year - 1, 5),
-                                      lastDate: DateTime(DateTime.now().year + 1, 9),
-                                    ).then( (date){
-                                      if( date != null){
+                                      initialDate:
+                                          _selectedDateFromMonthYearPicker ??
+                                              widget.initialDate,
+                                      firstDate:
+                                          DateTime(DateTime.now().year - 1, 5),
+                                      lastDate:
+                                          DateTime(DateTime.now().year + 1, 9),
+                                    ).then((date) {
+                                      if (date != null) {
                                         setState(() {
-                                          _selectedDateFromMonthYearPicker = date;
+                                          _selectedDateFromMonthYearPicker =
+                                              date;
                                         });
                                         refreshMonthExpenditure(user);
                                       }
-
                                     });
-
                                   },
                                 ),
                               ),
 
-                              SizedBox(height:5.0 ,),
+                              SizedBox(
+                                height: 5.0,
+                              ),
 
                               //Graph Title
                               CustomText(
@@ -557,27 +576,34 @@ class _StatisticsState extends State<Statistics> {
                                 fontSize: 20.0,
                               ),
 
-                              Expanded(child: MonthGraph(data: data, onMonthGraphSelected: _onMonthGraphSelected,)),
+                              Expanded(
+                                  child: MonthGraph(
+                                data: data,
+                                onMonthGraphSelected: _onMonthGraphSelected,
+                              )),
                             ],
                           ),
                         );
                       }
-
                   }
-                  return  Center( child: Text('No Content'),);
+                  return Center(
+                    child: Text('No Content'),
+                  );
                 },
               ),
             ],
           ),
         ),
 
-        SizedBox(height:10.0 ,),
+        SizedBox(
+          height: 10.0,
+        ),
 
         //Search expense and income of a particular date
         Container(
           margin: EdgeInsets.only(left: 5.0, right: 5.0),
           child: CustomCard(
-              cardHeight: _selectedDate !=null ? 350.0 : 200,
+              cardHeight: _selectedDate != null ? 350.0 : 200,
               cardPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
               cardColor: cardColor,
               gradientColor1: clipColor,
@@ -594,19 +620,26 @@ class _StatisticsState extends State<Statistics> {
                     fontSize: 20.0,
                   ),
 
-                  SizedBox(height: 10.0,),
+                  SizedBox(
+                    height: 10.0,
+                  ),
 
                   //Button to show datetime picker
                   ButtonTheme(
                     minWidth: 250.0,
                     child: RaisedButton(
-                      child: Text('Select A Date',style: TextStyle(color: buttonTextColor),),
+                      child: Text(
+                        'Select A Date',
+                        style: TextStyle(color: buttonTextColor),
+                      ),
                       color: buttonColor,
                       padding: EdgeInsets.all(10.0),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),),
-                      onPressed: ()  async {
-                        var selectedDate = await DatePicker().showDateTimePicker(context: context);
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      onPressed: () async {
+                        var selectedDate = await DatePicker()
+                            .showDateTimePicker(context: context);
                         setState(() {
                           _itemPrice2 = null;
                           _selectedDate = selectedDate;
@@ -615,97 +648,114 @@ class _StatisticsState extends State<Statistics> {
                     ),
                   ),
 
-                  SizedBox(height: 5.0,),
+                  SizedBox(
+                    height: 5.0,
+                  ),
 
                   //get income of selected item
-                  _itemPrice2 != null ? Row(
-                    children: <Widget>[
-                       StreamBuilder<Income>(
-                          stream: DatabaseService(userId: user.uid).searchIncomeByDate(_selectedDate),
-                          builder: (context, snapshot) {
-                            var income =0;
-                            if(snapshot.hasData){
-                              income = snapshot.data.income;
-                            }
-                            return CustomText(
-                              text: 'Income: $income',
+                  _itemPrice2 != null
+                      ? Row(
+                          children: <Widget>[
+                            StreamBuilder<Income>(
+                                stream: DatabaseService(userId: user.uid)
+                                    .searchIncomeByDate(_selectedDate),
+                                builder: (context, snapshot) {
+                                  var income = 0;
+                                  if (snapshot.hasData) {
+                                    income = snapshot.data.income;
+                                  }
+                                  return CustomText(
+                                    text: 'Income: $income',
+                                    textColor: Colors.white,
+                                    fontFamily: 'open sans',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15.0,
+                                  );
+                                }),
+
+                            SizedBox(
+                              width: 5.0,
+                            ),
+
+                            //Item selected and its price
+                            CustomText(
+                              text: '$_item2 : $_itemPrice2',
                               textColor: Colors.white,
                               fontFamily: 'open sans',
                               fontWeight: FontWeight.w500,
                               fontSize: 15.0,
-                            );
-                          }
-                      ),
-
-                      SizedBox(width: 5.0,),
-
-                      //Item selected and its price
-                      CustomText(
-                        text: '$_item2 : $_itemPrice2',
-                        textColor: Colors.white,
-                        fontFamily: 'open sans',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15.0,
-                      )
-                    ],
-                  ): Visibility(child: Text(''), visible: false,),
+                            )
+                          ],
+                        )
+                      : Visibility(
+                          child: Text(''),
+                          visible: false,
+                        ),
 
                   //Show the results in graph
-                  _selectedDate != null ?
-                       StreamBuilder(
-                         stream: DatabaseService(userId: user.uid).searchExpenseByDateTime(scaffoldKey: widget.scaffoldKey, dateTime: _selectedDate),
-                         builder: (context,AsyncSnapshot<QuerySnapshot> snapshot){
+                  _selectedDate != null
+                      ? StreamBuilder(
+                          stream: DatabaseService(userId: user.uid)
+                              .searchExpenseByDateTime(
+                                  scaffoldKey: widget.scaffoldKey,
+                                  dateTime: _selectedDate),
+                          builder:
+                              (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                            List<Expense> expenses = [];
 
-                           List<Expense> expenses = [];
+                            if (snapshot.hasData &&
+                                snapshot.data.documents.isNotEmpty) {
+                              int count = 0;
 
-                           if(snapshot.hasData && snapshot.data.documents.isNotEmpty){
+                              for (var doc in snapshot.data.documents) {
+                                var price = doc.data['Price'];
+                                var item = doc.data['Item'];
 
-                             int count = 0;
+                                count += 1;
 
-                             for(var doc in snapshot.data.documents){
-                               var price = doc.data['Price'];
-                               var item = doc.data['Item'];
+                                var expense = Expense(
+                                    item: item,
+                                    price: price,
+                                    barColor: count % 2 == 0
+                                        ? charts.ColorUtil.fromDartColor(
+                                            Colors.orange[900])
+                                        : charts.ColorUtil.fromDartColor(
+                                            Colors.purple));
 
-                               count += 1;
-
-                               var expense = Expense(item: item,price: price,
-                                             barColor: count %2 ==0? charts.ColorUtil.fromDartColor(Colors.orange[900])
-                                                       :charts.ColorUtil.fromDartColor(Colors.purple)
-                                              );
-
-                               expenses.add(expense);
-                             }
-                             return Expanded(child: TodayGraph(data: expenses,onTodayGraphSelected: _onResultGraphSelected,));
-
-                           }else{
-
-                             return  CustomText(
-                               text: 'No records for selected date',
-                               textColor: Colors.white,
-                               fontFamily: 'open sans',
-                               fontWeight: FontWeight.w700,
-                               fontSize: 15.0,
-                             );
-                           }
-
-
-                         },
-                       )
-                      :Visibility(child: Text(''),visible: false,)
-
+                                expenses.add(expense);
+                              }
+                              return Expanded(
+                                  child: TodayGraph(
+                                data: expenses,
+                                onTodayGraphSelected: _onResultGraphSelected,
+                              ));
+                            } else {
+                              return CustomText(
+                                text: 'No records for selected date',
+                                textColor: Colors.white,
+                                fontFamily: 'open sans',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15.0,
+                              );
+                            }
+                          },
+                        )
+                      : Visibility(
+                          child: Text(''),
+                          visible: false,
+                        )
                 ],
-              )
-          ),
+              )),
         ),
 
-        SizedBox(height:10.0 ,),
+        SizedBox(
+          height: 10.0,
+        ),
 
-
-        SizedBox(height:10.0 ,),
-
+        SizedBox(
+          height: 10.0,
+        ),
       ],
     );
-
-
   }
 }

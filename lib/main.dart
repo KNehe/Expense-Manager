@@ -9,47 +9,36 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'Constants/Colors.dart';
 
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-
-
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown
-      ]);
-      
-      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor:  statusBarColor,
-        statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: bottomNavigationBackgroundColor,
-        systemNavigationBarIconBrightness: Brightness.light,
-      ));
-      //TODO splashscreen app logo
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: statusBarColor,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: bottomNavigationBackgroundColor,
+      systemNavigationBarIconBrightness: Brightness.light,
+    ));
 
     return StreamProvider<User>.value(
       value: AuthService().getUser,
       child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              primarySwatch: THEME_COLOR,
-            ),
-            home: Wrapper(),
-            routes: {
-              Wrapper.id: (context)=> Wrapper(),
-              ForgotPassword.id : (context) => ForgotPassword(),
-              SignIn.id : (context) => SignIn(),
-              Home.id: (context) => Home()
-            },
-          ),
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: THEME_COLOR,
+        ),
+        home: Wrapper(),
+        routes: {
+          Wrapper.id: (context) => Wrapper(),
+          ForgotPassword.id: (context) => ForgotPassword(),
+          SignIn.id: (context) => SignIn(),
+          Home.id: (context) => Home()
+        },
+      ),
     );
-
-
   }
 }
-
-
