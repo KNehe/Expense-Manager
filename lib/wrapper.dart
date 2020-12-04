@@ -1,12 +1,9 @@
 import 'package:expensetracker/Services/authService.dart';
-import 'package:expensetracker/models/bottomNavProvider.dart';
 import 'package:expensetracker/screens/authenticate/authenticate.dart';
 import 'package:expensetracker/screens/home/home.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class Wrapper extends StatefulWidget {
-
   static String id = 'wrapper';
 
   @override
@@ -14,39 +11,34 @@ class Wrapper extends StatefulWidget {
 }
 
 class _WrapperState extends State<Wrapper> {
-
-
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<bool>(
       future: AuthService.getLoginState(),
-      builder: (BuildContext context, AsyncSnapshot<bool> snapshot){
-        switch(snapshot.connectionState){
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        switch (snapshot.connectionState) {
           case ConnectionState.active:
           case ConnectionState.waiting:
-            return Scaffold( body: Center( child: Text('Loading ...'),),);
+            return Scaffold(
+              body: Center(
+                child: Text('Loading ...'),
+              ),
+            );
           case ConnectionState.none:
           case ConnectionState.done:
-            if(snapshot.hasData){
+            if (snapshot.hasData) {
               bool loginState = snapshot.data;
-              if(loginState){
-                return ChangeNotifierProvider(
-                    create: (context) => BottomNavigationProvider(),
-                    child: Home()
-                );
-              }else{
+              if (loginState) {
+                return Home();
+              } else {
                 return Authenticate();
               }
-            }else{
+            } else {
               return Authenticate();
             }
         }
         return Authenticate();
       },
-
     );
-
   }
-
 }
