@@ -6,9 +6,7 @@ import 'package:expensetracker/screens/statistics/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-
 class Home extends StatefulWidget {
-
   static String id = 'Home';
 
   @override
@@ -16,12 +14,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   List<Widget> tabs;
 
-
-
-  final GlobalKey<ScaffoldState>_scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final Key addExpenseKey = PageStorageKey('addExpenseKey');
   final Key statisticsKey = PageStorageKey('statisticsKey');
@@ -31,19 +26,26 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-
-    tabs  = [
-            AddExpense( key: addExpenseKey, scaffoldKey: _scaffoldKey,),
-            Statistics( key: statisticsKey, scaffoldKey: _scaffoldKey,),
-            Account( key: accountKey, scaffoldKey: _scaffoldKey,)
-          ];
+    tabs = [
+      AddExpense(
+        key: addExpenseKey,
+        scaffoldKey: _scaffoldKey,
+      ),
+      Statistics(
+        key: statisticsKey,
+        scaffoldKey: _scaffoldKey,
+      ),
+      Account(
+        key: accountKey,
+        scaffoldKey: _scaffoldKey,
+      )
+    ];
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-
     var bottomNavProvider = Provider.of<BottomNavigationProvider>(context);
 
     return Scaffold(
@@ -51,28 +53,21 @@ class _HomeState extends State<Home> {
       backgroundColor: scaffoldBackgroundColor,
       body: PageStorage(
         child: SafeArea(
-            child: tabs[ bottomNavProvider.currentIndex ],
+          child: tabs[bottomNavProvider.currentIndex],
         ),
         bucket: bucket,
       ),
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: bottomNavProvider.currentIndex,
         items: [
-           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            title: Text('Home')
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            title: Text('Statistics')
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Statistics'),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
-            title: Text('Account')
+            label: 'Account',
           )
         ],
-        onTap: (index) => setState( (){
+        onTap: (index) => setState(() {
           bottomNavProvider.currentIndex = index;
         }),
         backgroundColor: bottomNavigationBackgroundColor,
@@ -84,4 +79,3 @@ class _HomeState extends State<Home> {
     );
   }
 }
-
