@@ -7,7 +7,12 @@
 
 ## Sample screenshots
 
-![Home screen screenshot](/../screenshots/home.PNG?raw=true)   ![Home screen screenshot](/../screenshots/todaygraph.PNG?raw=true)
+<table>
+  <tr>
+    <td><img src="/../screenshots/home.PNG" width=270 height=480></td>
+    <td><img src="/../screenshots/todaygraph.PNG" width=270 height=480></td>
+  </tr>
+ </table>
 
 ## Features
 
